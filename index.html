@@ -1,0 +1,2063 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VLSI Design Laboratory (EC-39006) | Department of ECE</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Font Awesome for Academic & Engineering Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            navy: {
+              800: '#0f172a',
+              900: '#090d16',
+              950: '#05080f',
+            },
+            silicon: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+</script>
+</script>
+  <style>
+    /* Subtle PCB / Silicon Wafer Grid Background Pattern */
+    .circuit-pattern {
+      background-color: #090d16;
+      background-image: 
+        radial-gradient(rgba(16, 185, 129, 0.14) 1px, transparent 1px),
+        linear-gradient(to right, rgba(30, 41, 59, 0.35) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(30, 41, 59, 0.35) 1px, transparent 1px);
+      background-size: 28px 28px, 56px 56px, 56px 56px;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #64748b;
+    }
+
+    /* Smooth View Transition */
+    .fade-in {
+      animation: fadeIn 0.28s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Print Styles for Saving Experiment Detail as PDF */
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      body {
+        background: white !important;
+        color: black !important;
+      }
+      .print-shadow-none {
+        box-shadow: none !important;
+        border: 1px solid #cbd5e1 !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+
+  <!-- Toast Notification Banner (Replaces alert()) -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Top Navigation Bar -->
+  <header class="bg-navy-900 text-white border-b border-slate-800 sticky top-0 z-40 shadow-md no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="navigateToHome()">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <i class="fa-solid fa-microchip text-white text-lg"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="nav-course-code" class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">EC-39006</span>
+            <span class="font-bold text-sm sm:text-base tracking-tight text-white" id="nav-lab-title">VLSI Design Laboratory</span>
+          </div>
+          <p class="text-[11px] text-slate-400 hidden sm:block" id="nav-dept-title">School of Electronics Engineering</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button onclick="navigateToHome()" id="nav-home-btn" class="px-3 py-2 rounded-lg text-xs sm:text-sm font-medium text-slate-200 hover:text-white hover:bg-slate-800 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-house text-emerald-400"></i>
+          <span>Lab Index</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area (Dynamically switches between Index View & Experiment Detail View) -->
+  <main id="app-root" class="flex-grow">
+    <!-- Rendered via JavaScript -->
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-navy-950 text-slate-400 border-t border-slate-800/80 py-8 mt-16 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+      <div class="flex items-center gap-2.5">
+        <i class="fa-solid fa-microchip text-emerald-500 text-base"></i>
+        <span><strong class="text-slate-200" id="footer-lab-name">VLSI Design Laboratory (EC-39006)</strong> — <span id="footer-univ-name">Kalinga Institute of Industrial Technology</span></span>
+      </div>
+      <div class="text-slate-500">
+        Designed for Undergraduate & Postgraduate Microelectronics Curriculum
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // =========================================================================
+    // 1. LAB METADATA & COURSE OUTCOMES DATA
+    // =========================================================================
+    const labInfo = {
+      university: "Kalinga Institute of Industrial Technology",
+      department: "School of Electronics Engineering",
+      courseCode: "EC-39006",
+      labName: "VLSI Design Laboratory",
+      semester: "B.Tech 6th Semester • Credits: 1 • Contact Hours: 2 Hrs/Week"
+    };
+
+    const COURSE_OUTCOMES = [
+      {
+        id: "CO1",
+        bloom: "Apply (BL-3)",
+        badgeColor: "bg-blue-50 text-blue-700 border-blue-200",
+        statement: "Model, simulate, and analyze DC, transient, and power-delay characteristics of MOS transistors and CMOS inverters using SPICE/EDA environments."
+      },
+      {
+        id: "CO2",
+        bloom: "Analyze (BL-4)",
+        badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        statement: "Design and evaluate static CMOS combinational logic gates (NAND, NOR, AOI/OAI) with transistor sizing for equal rise and fall propagation delays."
+      },
+      {
+        id: "CO3",
+        bloom: "Design (BL-5)",
+        badgeColor: "bg-purple-50 text-purple-700 border-purple-200",
+        statement: "Construct sequential storage elements including master-slave D flip-flops and synchronous counters, verifying setup/hold timing constraints."
+      },
+      {
+        id: "CO4",
+        bloom: "Create (BL-6)",
+        badgeColor: "bg-amber-50 text-amber-700 border-amber-200",
+        statement: "Develop synthesizable RTL descriptions in Verilog HDL for arithmetic logic units (ALUs) and verify functional correctness via self-checking testbenches."
+      },
+      {
+        id: "CO5",
+        bloom: "Evaluate (BL-5)",
+        badgeColor: "bg-rose-50 text-rose-700 border-rose-200",
+        statement: "Draw physical stick diagrams and CMOS standard-cell layouts, performing Design Rule Check (DRC), Layout Versus Schematic (LVS), and parasitic extraction."
+      },
+      {
+        id: "CO6",
+        bloom: "Create (BL-6)",
+        badgeColor: "bg-purple-50 text-purple-700 border-purple-200",
+        statement: "FPGA implementation of Verilog design"
+      }
+    ];
+
+    // =========================================================================
+    // 2. COMPREHENSIVE VLSI EXPERIMENTS DATASET (SUPPORTS MULTIPLE CODE SNIPPETS)
+    // =========================================================================
+    const EXPERIMENTS = [
+      {
+        id: 1,
+        code: "EXP-01",
+        title: "Design and Simulation of 4-bit adder (RCA) using dataflow and structural modeling",
+        pdfFile: "manuals/EXP-01.pdf",
+        category: "Verilog/FPGA",
+        domain: "VERILOG",
+        duration: "2 Hours",
+        coMapped: ["CO4", "CO6"],
+        tags: ["Verilog", "Synthesis", "FPGA", "Ripple Carry Adder"],
+        summary: "Synthesis, simulation and FPGA implementation of 4-bit ripple carry adder using dataflow and structural modeling.",
+        objectives: [
+          "To design and test a single-bit full adder in Verilog using dataflow modeling.",
+          "To design and test a 4-bit Ripple Carry Adder (RCA) structurally by instantiating four 1-bit full adders.",
+          "To perform FPGA implementation and hardware verification of the 4-bit adder."
+        ],
+        tools: [
+          { name: "Xilinx Vivado", role: "Verilog simulation and FPGA implementation", icon: "fa-wave-square" },
+          { name: "Nexys4 DDR / Basys-3 FPGA", role: "FPGA Hardware Implementation", icon: "fa-bolt" }
+        ],
+        theory: `
+          <p class="mb-3">A <strong>4-bit Ripple Carry Adder (RCA)</strong> is a digital circuit that adds two 4-bit binary numbers, <code>A[3:0]</code> and <code>B[3:0]</code>, along with an initial carry-in <code>Cin</code>. It is constructed by cascading four 1-bit full adders (FA) in series, where the carry-out (<code>Cout</code>) of each stage feeds the carry-in (<code>Cin</code>) of the next stage.</p>
+          <p class="mb-3">Using <strong>structural modeling</strong> in Verilog HDL, a low-level 1-bit full adder module (<code>fa1</code>) is first written using dataflow boolean equations and then instantiated four times inside the top-level <code>rca4</code> module.</p>
+        `,
+        diagramSvg: `
+          <img src="img/rca.png" alt="4 bit RCA" class="mx-auto rounded-lg max-h-56 object-contain" onerror="this.outerHTML='<div class=\'p-6 text-center text-xs font-mono text-slate-500 border border-dashed border-slate-300 rounded-xl bg-white\'>[4-Bit Ripple Carry Adder Block Diagram: FA0 &rarr; FA1 &rarr; FA2 &rarr; FA3]</div>'">
+        `,
+        codeSnippets: [
+          {
+            title: "1-Bit Full Adder — Dataflow Style (fa1.v)",
+            language: "Verilog",
+            code: `// Verilog code for 1-bit adder using dataflow style
+module fa1(
+    input a, b, cin,
+    output sum, cout
+);
+  assign sum  = a ^ b ^ cin;
+  assign cout = ((a ^ b) & cin) | (a & b);
+endmodule`
+          },
+          {
+            title: "4-Bit Ripple Carry Adder — Structural Style (rca4.v)",
+            language: "Verilog",
+            code: `// Structural model instantiating four 1-bit full adders
+module rca4(
+    input  [3:0] a, b,
+    input        cin,
+    output [3:0] sum,
+    output       cout
+);
+  wire c1, c2, c3;
+
+  fa1 u0 (.a(a[0]), .b(b[0]), .cin(cin), .sum(sum[0]), .cout(c1));
+  fa1 u1 (.a(a[1]), .b(b[1]), .cin(c1),  .sum(sum[1]), .cout(c2));
+  fa1 u2 (.a(a[2]), .b(b[2]), .cin(c2),  .sum(sum[2]), .cout(c3));
+  fa1 u3 (.a(a[3]), .b(b[3]), .cin(c3),  .sum(sum[3]), .cout(cout));
+endmodule`
+          },
+          {
+            title: "4-Bit RCA Testbench (tb_rca4.v)",
+            language: "Verilog",
+            code: `\`timescale 1ns / 1ps
+module tb_rca4;
+  reg  [3:0] a, b;
+  reg        cin;
+  wire [3:0] sum;
+  wire       cout;
+
+  rca4 uut (.a(a), .b(b), .cin(cin), .sum(sum), .cout(cout));
+
+  initial begin
+    a = 4'b0011; b = 4'b0101; cin = 1'b0; #10; // 3 + 5 = 8
+    a = 4'b1111; b = 4'b0001; cin = 1'b0; #10; // 15 + 1 = 16 (cout=1, sum=0)
+    a = 4'b1010; b = 4'b0101; cin = 1'b1; #10; // 10 + 5 + 1 = 16
+    $finish;
+  end
+endmodule`
+          }
+        ],
+        procedure: [
+          "Launch <strong>Xilinx Vivado</strong> and create a new RTL project targeting the Nexys4 DDR / Basys-3 FPGA board.",
+          "Create the design source file <code>fa1.v</code> implementing the 1-bit full adder using dataflow <code>assign</code> statements.",
+          "Create the top-level structural Verilog module <code>rca4.v</code> and instantiate four instances of <code>fa1</code>.",
+          "Add the simulation testbench <code>tb_rca4.v</code> and run <strong>Behavioral Simulation</strong> to verify sum and carry outputs.",
+          "Add the XDC constraints file mapping inputs <code>a</code>, <code>b</code>, <code>cin</code> to slide switches and outputs <code>sum</code>, <code>cout</code> to LEDs, then generate bitstream and program the FPGA."
+        ],
+        videoId: "JUHIvxhl_iw",
+        videoTitle: "4-Bit Ripple Carry Adder Design & Simulation in Verilog HDL",
+        videoChannel: "VLSI & FPGA Digital Design Lab",
+        videoNotes: "Covers dataflow modeling of a 1-bit full adder, structural instantiation in Verilog, and testbench verification."
+      },
+       {
+        id: 2,
+        code: "EXP-02",
+        title: "Introduction to Behavioral Modeling Design and Simulation of Flip-Flops and a 4-bit Up/Down Counter Using Behavioral Modeling with Debugging via Integrated Logic Analyzer (ILA) in FPGA",
+        pdfFile: "manuals/EXP-02.pdf",
+        category: "Verilog/FPGA",
+        domain: "VERILOG",
+        duration: "2 Hours",
+        coMapped: ["CO4", "CO6"],
+        tags: ["Verilog", "Synthesis", "FPGA", "Ripple Carry Adder"],
+        summary: "Synthesis, simulation and FPGA implementation of 4-bit ripple carry adder using dataflow and structural modeling.",
+        objectives: [
+          "To design and test a Flip flop in Verilog using dataflow modeling.",
+          "To design and test synchronous and asynchronous counter.",
+          "Using the inbuilt Integrated logic analyzer (ILA) in Vivado IP core to observer output",
+          "To perform FPGA implementation and hardware verification of the 4-bit adder."
+        ],
+        tools: [
+          { name: "Xilinx Vivado", role: "Verilog simulation and FPGA implementation", icon: "fa-wave-square" },
+          { name: "Nexys4 DDR / Basys-3 FPGA", role: "FPGA Hardware Implementation", icon: "fa-bolt" }
+        ],
+        theory: `
+          <p class="mb-3">Behavioral modeling in Verilog is the highest level of abstraction for describing digital hardware. Instead of specifying logic gates or continuous dataflow equations, you describe what the circuit does algorithmically—similar to writing software in C—using procedural blocks.</p>
+          <p class="mb-3"> <h2><strong>Core Procedural Blocks</strong></h2>
+    <p>Behavioral code lives inside structured blocks that control when and how statements execute:</p>
+    <ul>
+        <li><strong><code>always</code> block:</strong> Executes continuously in a loop whenever a signal in its <strong>sensitivity list</strong> changes. Used for synthesizable hardware (both combinational and sequential logic).</li>
+        <li><strong><code>initial</code> block:</strong> Executes only once at simulation start (<code>t = 0</code>). Used strictly for testbenches, stimulus generation, and variable initialization—<strong>not synthesizable</strong>.</li>
+    </ul>
+
+    <hr>
+
+    <h2><strong>Procedural Assignments: Blocking vs. Non-Blocking</strong></h2>
+    <p>Choosing the right assignment operator inside an <code>always</code> block is critical to avoiding race conditions and synthesis mismatches.</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Feature</th>
+                <th>Blocking (<code>=</code>)</th>
+                <th>Non-Blocking (<code>&lt;</code>=)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Execution</strong></td>
+                <td>Sequential (evaluates and assigns immediately before the next line)</td>
+                <td>Concurrent (evaluates all RHS expressions first, then updates LHS at the end of the time step)</td>
+            </tr>
+            <tr>
+                <td><strong>Hardware Inferred</strong></td>
+                <td>Combinational logic</td>
+                <td>Sequential logic (Flip-Flops / Registers)</td>
+            </tr>
+            <tr>
+                <td><strong>Use Case</strong></td>
+                <td><code>always @(*)</code> combinational blocks</td>
+                <td><code>always @(posedge clk)</code> clocked blocks</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <hr>
+
+    <h2>Common Behavioral Constructs</h2>
+    <ul>
+        <li>
+            <strong>Conditional Statements:</strong> <code>if-else</code> and <code>case</code> (must be inside <code>always</code> or <code>initial</code> blocks).
+            <ul>
+                <li><em>Rule:</em> In combinational <code>always @(*)</code> blocks, ensure every <code>if</code> has an <code>else</code> and every <code>case</code> has a <code>default</code> to prevent unintended <strong>latches</strong>.</li>
+            </ul>
+        </li>
+        <li><strong>Loops:</strong> <code>for</code>, <code>while</code>, <code>repeat</code>, and <code>forever</code>. (In synthesizable RTL, <code>for</code> loops must have static bounds so the synthesis tool can unroll them into hardware).</li>
+        <li><strong>Data Types:</strong> Any signal assigned inside an <code>always</code> or <code>initial</code> block must be declared as <code>reg</code> (or <code>logic</code> in SystemVerilog), even if it synthesizes to a simple wire.</li>
+    </ul>
+
+    <hr>
+
+    <h2>Practical Examples</h2>
+
+    <h3>1. Combinational Logic (4-to-1 Multiplexer)</h3>
+    <p>Uses <code>always @(*)</code> so the sensitivity list automatically tracks all inputs, paired with blocking (<code>=</code>) assignments.</p>
+
+<pre><code><span class="keyword">module</span> mux_4to1 (
+    <span class="keyword">input  wire</span> [<span class="number">3</span>:<span class="number">0</span>] d,
+    <span class="keyword">input  wire</span> [<span class="number">1</span>:<span class="number">0</span>] sel,
+    <span class="keyword">output reg</span>        y
+);
+
+    <span class="keyword">always</span> @(*) <span class="keyword">begin</span>
+        <span class="keyword">case</span> (sel)
+            <span class="number">2'b00</span>:   y = d[<span class="number">0</span>];
+            <span class="number">2'b01</span>:   y = d[<span class="number">1</span>];
+            <span class="number">2'b10</span>:   y = d[<span class="number">2</span>];
+            <span class="number">2'b11</span>:   y = d[<span class="number">3</span>];
+            <span class="keyword">default</span>: y = <span class="number">1'b0</span>; <span class="comment">// Prevents latch inference</span>
+        <span class="keyword">endcase</span>
+    <span class="keyword">end</span>
+
+<span class="keyword">endmodule</span></code></pre>
+
+    <h3>2. Sequential Logic (D Flip-Flop with Synchronous Reset)</h3>
+    <p>Triggered on the positive clock edge, paired with non-blocking (<code>&lt;</code>=) assignments.</p>
+
+<pre><code><span class="keyword">module</span> d_ff (
+    <span class="keyword">input  wire</span> clk,
+    <span class="keyword">input  wire</span> rst,
+    <span class="keyword">input  wire</span> d,
+    <span class="keyword">output reg</span>  q
+);
+
+    <span class="keyword">always</span> @(<span class="keyword">posedge</span> clk) <span class="keyword">begin</span>
+        <span class="keyword">if</span> (rst)
+            q &lt;&zwnj;= <span class="number"> 1'b0</span>;
+        <span class="keyword">else</span>
+            q &lt;&zwnj;= d;
+    <span class="keyword">end</span>
+
+<span class="keyword">endmodule</span></code></pre>
+</div></p>
+            `,
+        diagramSvg: ``,
+        codeSnippets: [
+          {
+            title: "JK Flip flop — Behavioral Style (jkff.v)",
+            language: "Verilog",
+            code: `module jk_ff (
+    input  wire clk,
+    input  wire j,
+    input  wire k,
+    output reg  q,
+    output wire q_bar
+);
+
+    // Continuous assignment for the inverted output
+    assign q_bar = ~q;
+
+    // Behavioral model triggered on the rising edge of the clock
+    always @(posedge clk) begin
+        case ({j, k})
+            2'b00: q &lt;&zwnj;= q;      // No change (Hold state)
+            2'b01: q &lt;&zwnj;= 1'b0;   // Reset state
+            2'b10: q &lt;&zwnj;= 1'b1;   // Set state
+            2'b11: q &lt;&zwnj;= ~q;     // Toggle state
+        endcase
+    end
+
+endmodule`
+          },
+          {
+            title: "4-Bit binary counter",
+            language: "Verilog",
+            code: `// 4 bit binary counter
+module counter_4bit (
+    input  wire       clk,
+    input  wire       rst,
+    output reg  [3:0] count
+);
+
+    always @(posedge clk) begin
+        if (rst)
+            count &lt;&zwnj;= 4'b0000;      // Reset counter to 0
+        else
+            count &lt;&zwnj;= count + 1'b1; // Increment by 1 on each clock edge
+    end
+
+endmodule`
+          },
+          {
+            title: "4-Bit counter Testbench (tb_counter.v)",
+            language: "Verilog",
+            code: `
+module tb_counter_4bit;
+
+    // Testbench signals
+    reg        clk;
+    reg        rst;
+    wire [3:0] count;
+
+    // Instantiate the Unit Under Test (UUT)
+    counter_4bit uut (
+        .clk   (clk),
+        .rst   (rst),
+        .count (count)
+    );
+
+    // Clock generation: 10ns period (100 MHz)
+    initial begin
+        clk = 1'b0;
+        forever #5 clk = ~clk;
+    end
+
+    // Stimulus block
+    initial begin
+        // Monitor signal changes in the console
+        $monitor("Time = %0t ns | rst = %b | count = %d (%b)", $time, rst, count, count);
+
+        // 1. Assert reset initially
+        rst = 1'b1;
+        #20; // Hold reset for 2 clock cycles
+
+        // 2. Release reset and let the counter run through a full roll-over (0 to 15 and back to 0)
+        rst = 1'b0;
+        #180; // 18 clock cycles
+
+        // 3. Assert reset mid-count to verify synchronous reset behavior
+        rst = 1'b1;
+        #15;
+        rst = 1'b0;
+        #30;
+
+        // End simulation
+        $finish;
+    end
+
+endmodule`
+          }
+        ],
+        procedure: [
+          "Launch <strong>Xilinx Vivado</strong> and create a new RTL project targeting the Nexys4 DDR / Basys-3 FPGA board.",
+          "Create the design source file <code>jkff.v</code> implementing the jk flip flop.",
+          "Create the counter module <code>counter4.v</code>.",
+          "Add the simulation testbench and run <strong>Behavioral Simulation</strong> to verify outputs.",
+          "Add the XDC constraints file mapping inputs , then generate bitstream and program the FPGA."
+        ],
+        videoId: "JUHIvxhl_iw",
+        videoTitle: "Counter Design in Verilog HDL",
+        videoChannel: "VLSI & FPGA Digital Design Lab",
+        videoNotes: "Covers Behavioral modeling of JK flip flop, binary counter and testbench verification."
+      },
+      {
+        id: 4,
+        code: "EXP-04",
+        title: "DC & Transient Characteristics of a Static CMOS Inverter",
+        category: "Analog / Full-Custom SPICE",
+        domain: "SPICE",
+        duration: "3 Hours",
+        coMapped: ["CO1"],
+        tags: ["CMOS Inverter", "VTC Curve", "Noise Margin", "Propagation Delay"],
+        summary: "Simulate Voltage Transfer Characteristics (VTC), switching threshold (Vm), noise margins (NMH, NML), and rise/fall propagation delays (tpLH, tpHL) of a static CMOS inverter.",
+        objectives: [
+          "To design a schematic of a static CMOS inverter using 180nm / 45nm technology models.",
+          "To plot the Voltage Transfer Characteristic (VTC) and determine the switching threshold voltage (Vm).",
+          "To compute Noise Margin High (NMH) and Noise Margin Low (NML) from unity-gain points (VIH, VIL).",
+          "To perform transient analysis and measure propagation delays (tpHL, tpLH) and dynamic power dissipation."
+        ],
+        tools: [
+          { name: "Cadence Virtuoso", role: "Schematic & Spectre Simulation", icon: "fa-wave-square" },
+          { name: "LTspice XVII", role: "SPICE Netlist Simulation", icon: "fa-bolt" },
+          { name: "GPDK 180nm / 45nm", role: "BSIM4 Device Model Library", icon: "fa-microchip" }
+        ],
+        theory: `
+          <p class="mb-3">A static <strong>CMOS Inverter</strong> consists of a pull-up <strong>PMOS</strong> transistor connected to <code>V<sub>DD</sub></code> and a pull-down <strong>NMOS</strong> transistor connected to <code>GND</code>, with their gates tied together as input <code>V<sub>in</sub></code> and drains tied together as output <code>V<sub>out</sub></code>.</p>
+          <p class="mb-3">When <code>V<sub>in</sub> = 0 V</code>, the NMOS is in cutoff while the PMOS operates in the linear region, pulling <code>V<sub>out</sub></code> to <code>V<sub>DD</sub></code>. Conversely, when <code>V<sub>in</sub> = V<sub>DD</sub></code>, the NMOS turns ON and discharges the load capacitance <code>C<sub>L</sub></code> to <code>0 V</code>. Because one transistor is always OFF in steady state, static power dissipation is negligible.</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 my-4">
+            <div class="bg-slate-900 text-emerald-300 p-3.5 rounded-xl font-mono text-xs border border-slate-700">
+              <div class="text-slate-400 text-[11px] uppercase mb-1">Switching Threshold (V<sub>m</sub>)</div>
+              V<sub>m</sub> = (V<sub>DD</sub> - |V<sub>tp</sub>| + V<sub>tn</sub>&radic;(k<sub>n</sub>/k<sub>p</sub>)) / (1 + &radic;(k<sub>n</sub>/k<sub>p</sub>))
+            </div>
+            <div class="bg-slate-900 text-cyan-300 p-3.5 rounded-xl font-mono text-xs border border-slate-700">
+              <div class="text-slate-400 text-[11px] uppercase mb-1">Noise Margins & Propagation Delay</div>
+              NM<sub>H</sub> = V<sub>OH</sub> - V<sub>IH</sub> &nbsp;|&nbsp; NM<sub>L</sub> = V<sub>IL</sub> - V<sub>OL</sub><br/>
+              t<sub>p</sub> = (t<sub>pHL</sub> + t<sub>pLH</sub>) / 2
+            </div>
+          </div>
+          <p>To achieve symmetric VTC (<code>V<sub>m</sub> &approx; V<sub>DD</sub>/2</code>) and equal rise/fall delays, the PMOS width is typically sized <strong>2&times; to 2.5&times;</strong> wider than the NMOS width (<code>W<sub>p</sub> &approx; 2.5 W<sub>n</sub></code>) to compensate for lower hole mobility (&mu;<sub>p</sub> &lt; &mu;<sub>n</sub>).</p>
+        `,
+        diagramSvg: `
+          <svg viewBox="0 0 420 230" class="w-full max-w-md mx-auto bg-white rounded-xl border border-slate-200 p-3">
+            <!-- VDD Rail -->
+            <line x1="160" y1="25" x2="260" y2="25" stroke="#0f172a" stroke-width="2.5"/>
+            <text x="210" y="17" text-anchor="middle" font-family="JetBrains Mono" font-size="12" font-weight="bold" fill="#059669">VDD (1.8V)</text>
+            <!-- PMOS -->
+            <line x1="210" y1="25" x2="210" y2="50" stroke="#0f172a" stroke-width="2"/>
+            <line x1="210" y1="50" x2="185" y2="50" stroke="#0f172a" stroke-width="2"/>
+            <line x1="185" y1="45" x2="185" y2="85" stroke="#0f172a" stroke-width="2"/>
+            <line x1="185" y1="80" x2="210" y2="80" stroke="#0f172a" stroke-width="2"/>
+            <line x1="176" y1="48" x2="176" y2="82" stroke="#0f172a" stroke-width="2"/>
+            <circle cx="170" cy="65" r="4.5" fill="none" stroke="#0284c7" stroke-width="2"/>
+            <text x="225" y="69" font-family="Inter" font-size="11" font-weight="600" fill="#0284c7">PMOS (Wp/Lp)</text>
+            <!-- Drain connection -->
+            <line x1="210" y1="80" x2="210" y2="145" stroke="#0f172a" stroke-width="2"/>
+            <!-- NMOS -->
+            <line x1="210" y1="145" x2="185" y2="145" stroke="#0f172a" stroke-width="2"/>
+            <line x1="185" y1="140" x2="185" y2="180" stroke="#0f172a" stroke-width="2"/>
+            <line x1="185" y1="175" x2="210" y2="175" stroke="#0f172a" stroke-width="2"/>
+            <line x1="176" y1="143" x2="176" y2="177" stroke="#0f172a" stroke-width="2"/>
+            <text x="225" y="165" font-family="Inter" font-size="11" font-weight="600" fill="#059669">NMOS (Wn/Ln)</text>
+            <!-- GND -->
+            <line x1="210" y1="175" x2="210" y2="198" stroke="#0f172a" stroke-width="2"/>
+            <line x1="194" y1="198" x2="226" y2="198" stroke="#0f172a" stroke-width="2.5"/>
+            <line x1="200" y1="204" x2="220" y2="204" stroke="#0f172a" stroke-width="2"/>
+            <line x1="206" y1="210" x2="214" y2="210" stroke="#0f172a" stroke-width="1.5"/>
+            <!-- Gates Tied Together (Vin) -->
+            <line x1="165" y1="65" x2="140" y2="65" stroke="#0f172a" stroke-width="2"/>
+            <line x1="176" y1="160" x2="140" y2="160" stroke="#0f172a" stroke-width="2"/>
+            <line x1="140" y1="65" x2="140" y2="160" stroke="#0f172a" stroke-width="2"/>
+            <line x1="140" y1="112" x2="90" y2="112" stroke="#0f172a" stroke-width="2"/>
+            <circle cx="86" cy="112" r="4" fill="#0f172a"/>
+            <text x="55" y="116" font-family="JetBrains Mono" font-size="12" font-weight="bold" fill="#0f172a">Vin</text>
+            <!-- Output Node (Vout) + Cload -->
+            <circle cx="210" cy="112" r="4" fill="#e11d48"/>
+            <line x1="210" y1="112" x2="320" y2="112" stroke="#0f172a" stroke-width="2"/>
+            <circle cx="324" cy="112" r="4" fill="#e11d48"/>
+            <text x="335" y="116" font-family="JetBrains Mono" font-size="12" font-weight="bold" fill="#e11d48">Vout</text>
+            <!-- Load Cap -->
+            <line x1="285" y1="112" x2="285" y2="145" stroke="#64748b" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <line x1="273" y1="145" x2="297" y2="145" stroke="#64748b" stroke-width="2"/>
+            <line x1="273" y1="152" x2="297" y2="152" stroke="#64748b" stroke-width="2"/>
+            <line x1="285" y1="152" x2="285" y2="175" stroke="#64748b" stroke-width="1.5"/>
+            <line x1="277" y1="175" x2="293" y2="175" stroke="#64748b" stroke-width="2"/>
+            <text x="303" y="153" font-family="JetBrains Mono" font-size="10" fill="#64748b">CL (50fF)</text>
+          </svg>
+        `,
+        codeSnippets: [
+          {
+            title: "CMOS Inverter DC & Transient Netlist (cmos_inv.sp)",
+            language: "SPICE",
+            code: `* Static CMOS Inverter DC & Transient Simulation
+.include 'tsmc180nm.lib'
+
+VDD vdd 0 DC 1.8V
+VIN in 0 PULSE(0 1.8 1n 50p 50p 5n 10n)
+
+* PMOS: Drain Gate Source Bulk Model W L
+MP1 out in vdd vdd CMOSP W=1.0u L=0.18u
+* NMOS: Drain Gate Source Bulk Model W L
+MN1 out in 0   0   CMOSN W=0.4u L=0.18u
+
+CL out 0 50fF
+
+* Analyses
+.DC VIN 0 1.8 0.01
+.TRAN 10p 25n
+
+* Measurements
+.MEASURE TRAN tpHL TRIG V(in) VAL=0.9 RISE=1 TARG V(out) VAL=0.9 FALL=1
+.MEASURE TRAN tpLH TRIG V(in) VAL=0.9 FALL=1 TARG V(out) VAL=0.9 RISE=1
+.END`
+          },
+          {
+            title: "Parametric Width Sweep Script (wp_sweep.sp)",
+            language: "SPICE",
+            code: `* Parametric Sweep of PMOS Width (Wp) for Vm Optimization
+.PARAM Wp_val = 0.8u
+.STEP PARAM Wp_val 0.4u 1.6u 0.4u
+
+MP1 out in vdd vdd CMOSP W={Wp_val} L=0.18u
+MN1 out in 0   0   CMOSN W=0.4u    L=0.18u
+
+.DC VIN 0 1.8 0.005
+.MEASURE DC Vm WHEN V(out)=V(in)
+.END`
+          }
+        ],
+        procedure: [
+          "Launch the EDA schematic editor (Cadence Virtuoso / LTspice) and create a new library named <code>VLSI_Lab</code>.",
+          "Instantiate one NMOS (W = 400nm, L = 180nm) and one PMOS (W = 1000nm, L = 180nm) transistor.",
+          "Connect the gates together to input source <code>VIN</code>, drains to output node <code>VOUT</code>, PMOS source/bulk to <code>VDD (1.8V)</code>, and NMOS source/bulk to <code>GND</code>.",
+          "Attach a load capacitor <code>CL = 50 fF</code> at the output node.",
+          "Run a <strong>DC Sweep</strong> of <code>VIN</code> from 0V to 1.8V in steps of 10mV. Plot <code>VOUT</code> vs <code>VIN</code> and derivative <code>d(VOUT)/d(VIN)</code> to locate <code>VIL</code> and <code>VIH</code>.",
+          "Configure <code>VIN</code> as a pulse waveform (tr = tf = 50ps, period = 10ns) and run a <strong>Transient Analysis</strong> for 25ns to measure <code>tpHL</code> and <code>tpLH</code>."
+        ],
+        videoId: "f1lB957f5dY",
+        videoTitle: "CMOS Inverter Working, VTC Curve & Noise Margin Explained",
+        videoChannel: "All About Electronics • VLSI & Digital Microelectronics",
+        videoNotes: "Covers pull-up/pull-down regions of operation, derivation of switching threshold Vm, and graphical determination of Noise Margins."
+      },
+      {
+        id: 3,
+        code: "EXP-03",
+        title: "Design & Sizing of 2-Input CMOS NAND and NOR Logic Gates",
+        category: "Static CMOS Combinational Logic",
+        domain: "SPICE",
+        duration: "3 Hours",
+        coMapped: ["CO1", "CO2"],
+        tags: ["2-Input NAND", "2-Input NOR", "Logical Effort", "Transistor Sizing"],
+        summary: "Construct static 2-input CMOS NAND and NOR gates, size series/parallel transistors for worst-case delay matching, and verify functional truth tables.",
+        objectives: [
+          "To design transistor-level schematics of 2-input CMOS NAND and 2-input CMOS NOR gates.",
+          "To apply width-sizing rules for stacked series transistors so worst-case delays match a unit inverter.",
+          "To verify all four input combinations (00, 01, 10, 11) via transient waveform simulation.",
+          "To compare area, input capacitance, and propagation delay between NAND and NOR topologies."
+        ],
+        tools: [
+          { name: "Cadence Virtuoso", role: "Schematic Capture & ADE L", icon: "fa-wave-square" },
+          { name: "LTspice XVII", role: "Transient Waveform Verification", icon: "fa-bolt" },
+          { name: "GPDK 180nm", role: "Standard Cell Model Library", icon: "fa-microchip" }
+        ],
+        theory: `
+          <p class="mb-3">Static CMOS gates consist of a <strong>Pull-Up Network (PUN)</strong> built exclusively with PMOS devices and a complementary <strong>Pull-Down Network (PDN)</strong> built with NMOS devices.</p>
+          <ul class="list-disc pl-5 space-y-1.5 mb-3">
+            <li><strong>2-Input CMOS NAND:</strong> Two PMOS transistors in <em>parallel</em> (PUN) and two NMOS transistors in <em>series</em> (PDN). Since two series NMOS transistors double the pull-down resistance, each NMOS width is doubled (<code>W<sub>n</sub> = 2 &times; W<sub>n,inv</sub></code>) while each PMOS retains unit width (<code>W<sub>p</sub> = W<sub>p,inv</sub></code>).</li>
+            <li><strong>2-Input CMOS NOR:</strong> Two PMOS transistors in <em>series</em> (PUN) and two NMOS transistors in <em>parallel</em> (PDN). Stacking two low-mobility PMOS devices significantly increases resistance, requiring <code>W<sub>p</sub> = 2 &times; W<sub>p,inv</sub> &approx; 4W<sub>n</sub></code>, making NOR gates larger and slower than NAND gates.</li>
+          </ul>
+          <div class="overflow-x-auto my-3">
+            <table class="w-full text-xs text-left border border-slate-200 rounded-lg overflow-hidden">
+              <thead class="bg-slate-100 text-slate-700 font-semibold">
+                <tr>
+                  <th class="px-3 py-2 border-b">Input A</th>
+                  <th class="px-3 py-2 border-b">Input B</th>
+                  <th class="px-3 py-2 border-b">PUN State</th>
+                  <th class="px-3 py-2 border-b">PDN State</th>
+                  <th class="px-3 py-2 border-b text-emerald-700">NAND Out</th>
+                  <th class="px-3 py-2 border-b text-cyan-700">NOR Out</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 font-mono">
+                <tr><td class="px-3 py-1.5">0</td><td class="px-3 py-1.5">0</td><td class="px-3 py-1.5">ON</td><td class="px-3 py-1.5">OFF</td><td class="px-3 py-1.5 font-bold text-emerald-700">1</td><td class="px-3 py-1.5 font-bold text-cyan-700">1</td></tr>
+                <tr><td class="px-3 py-1.5">0</td><td class="px-3 py-1.5">1</td><td class="px-3 py-1.5">ON (NAND) / OFF (NOR)</td><td class="px-3 py-1.5">OFF / ON</td><td class="px-3 py-1.5 font-bold text-emerald-700">1</td><td class="px-3 py-1.5 font-bold text-cyan-700">0</td></tr>
+                <tr><td class="px-3 py-1.5">1</td><td class="px-3 py-1.5">0</td><td class="px-3 py-1.5">ON (NAND) / OFF (NOR)</td><td class="px-3 py-1.5">OFF / ON</td><td class="px-3 py-1.5 font-bold text-emerald-700">1</td><td class="px-3 py-1.5 font-bold text-cyan-700">0</td></tr>
+                <tr><td class="px-3 py-1.5">1</td><td class="px-3 py-1.5">1</td><td class="px-3 py-1.5">OFF</td><td class="px-3 py-1.5">ON</td><td class="px-3 py-1.5 font-bold text-emerald-700">0</td><td class="px-3 py-1.5 font-bold text-cyan-700">0</td></tr>
+              </tbody>
+            </table>
+          </div>
+        `,
+        diagramSvg: `
+          <svg viewBox="0 0 460 240" class="w-full max-w-lg mx-auto bg-white rounded-xl border border-slate-200 p-3">
+            <text x="230" y="18" text-anchor="middle" font-family="Inter" font-size="12" font-weight="bold" fill="#0f172a">2-Input CMOS NAND Gate Topology</text>
+            <!-- VDD -->
+            <line x1="120" y1="36" x2="340" y2="36" stroke="#0f172a" stroke-width="2.5"/>
+            <text x="230" y="30" text-anchor="middle" font-family="JetBrains Mono" font-size="11" font-weight="bold" fill="#059669">VDD</text>
+            <!-- Parallel PMOS A & B -->
+            <line x1="160" y1="36" x2="160" y2="95" stroke="#0284c7" stroke-width="2"/>
+            <rect x="142" y="52" width="36" height="28" rx="4" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+            <text x="160" y="70" text-anchor="middle" font-family="JetBrains Mono" font-size="10" font-weight="bold" fill="#0369a1">PMOS A</text>
+
+            <line x1="300" y1="36" x2="300" y2="95" stroke="#0284c7" stroke-width="2"/>
+            <rect x="282" y="52" width="36" height="28" rx="4" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+            <text x="300" y="70" text-anchor="middle" font-family="JetBrains Mono" font-size="10" font-weight="bold" fill="#0369a1">PMOS B</text>
+
+            <!-- Output Node Bar -->
+            <line x1="160" y1="95" x2="300" y2="95" stroke="#0f172a" stroke-width="2"/>
+            <line x1="230" y1="95" x2="380" y2="95" stroke="#e11d48" stroke-width="2"/>
+            <circle cx="384" cy="95" r="4" fill="#e11d48"/>
+            <text x="394" y="99" font-family="JetBrains Mono" font-size="11" font-weight="bold" fill="#e11d48">Y = (A·B)'</text>
+
+            <!-- Series NMOS A & B -->
+            <line x1="230" y1="95" x2="230" y2="115" stroke="#0f172a" stroke-width="2"/>
+            <rect x="206" y="115" width="48" height="28" rx="4" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+            <text x="230" y="133" text-anchor="middle" font-family="JetBrains Mono" font-size="10" font-weight="bold" fill="#047857">NMOS A (2W)</text>
+
+            <line x1="230" y1="143" x2="230" y2="160" stroke="#0f172a" stroke-width="2"/>
+            <rect x="206" y="160" width="48" height="28" rx="4" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+            <text x="230" y="178" text-anchor="middle" font-family="JetBrains Mono" font-size="10" font-weight="bold" fill="#047857">NMOS B (2W)</text>
+
+            <!-- GND -->
+            <line x1="230" y1="188" x2="230" y2="208" stroke="#0f172a" stroke-width="2"/>
+            <line x1="214" y1="208" x2="246" y2="208" stroke="#0f172a" stroke-width="2.5"/>
+            <line x1="220" y1="214" x2="240" y2="214" stroke="#0f172a" stroke-width="2"/>
+          </svg>
+        `,
+        codeSnippets: [
+          {
+            title: "2-Input CMOS NAND2 SPICE Netlist (nand2_cmos.sp)",
+            language: "SPICE",
+            code: `* 2-Input Static CMOS NAND Gate (Sized for Symmetric Delay)
+.include 'tsmc180nm.lib'
+
+VDD vdd 0 DC 1.8V
+VA  a   0 PULSE(0 1.8 0n 50p 50p 10n 20n)
+VB  b   0 PULSE(0 1.8 0n 50p 50p 20n 40n)
+
+* Parallel Pull-Up PMOS Network (Unit Width Wp = 1.0u)
+MPA out a vdd vdd CMOSP W=1.0u L=0.18u
+MPB out b vdd vdd CMOSP W=1.0u L=0.18u
+
+* Series Pull-Down NMOS Network (2x Width Wn = 0.8u)
+MNA out  a n1 0 CMOSN W=0.8u L=0.18u
+MNB n1   b 0  0 CMOSN W=0.8u L=0.18u
+
+CL out 0 50fF
+.TRAN 10p 45n
+.END`
+          },
+          {
+            title: "2-Input CMOS NOR2 SPICE Netlist (nor2_cmos.sp)",
+            language: "SPICE",
+            code: `* 2-Input Static CMOS NOR Gate (Sized for Symmetric Delay)
+.include 'tsmc180nm.lib'
+
+VDD vdd 0 DC 1.8V
+VA  a   0 PULSE(0 1.8 0n 50p 50p 10n 20n)
+VB  b   0 PULSE(0 1.8 0n 50p 50p 20n 40n)
+
+* Series Pull-Up PMOS Network (2x Width Wp = 2.0u)
+MPA n1  a vdd vdd CMOSP W=2.0u L=0.18u
+MPB out b n1  vdd CMOSP W=2.0u L=0.18u
+
+* Parallel Pull-Down NMOS Network (Unit Width Wn = 0.4u)
+MNA out a 0 0 CMOSN W=0.4u L=0.18u
+MNB out b 0 0 CMOSN W=0.4u L=0.18u
+
+CL out 0 50fF
+.TRAN 10p 45n
+.END`
+          }
+        ],
+        procedure: [
+          "Create two separate schematic cells named <code>NAND2_CMOS</code> and <code>NOR2_CMOS</code> in the library.",
+          "For <code>NAND2_CMOS</code>, wire two PMOS devices in parallel between <code>VDD</code> and <code>OUT</code>, and two NMOS devices (width = 2&times;Wn) in series between <code>OUT</code> and <code>GND</code>.",
+          "For <code>NOR2_CMOS</code>, wire two PMOS devices (width = 2&times;Wp) in series between <code>VDD</code> and <code>OUT</code>, and two NMOS devices in parallel between <code>OUT</code> and <code>GND</code>.",
+          "Apply two independent pulse sources <code>VA</code> (period 20ns) and <code>VB</code> (period 40ns) to generate all four input states (00, 01, 10, 11).",
+          "Run transient simulation for 45ns, verify the output logic levels, and record worst-case rise/fall delays."
+        ],
+        videoId: "f1lB957f5dY",
+        videoTitle: "CMOS Logic Gates Design: NAND, NOR & Complex AOI/OAI Gates",
+        videoChannel: "NPTEL / Microelectronics Lecture Series",
+        videoNotes: "Explains pull-up/pull-down duality, Euler path concept, and transistor width scaling for series stacks."
+      },
+      {
+        id: 4,
+        code: "EXP-04",
+        title: "Design of Master-Slave Edge-Triggered D Flip-Flop",
+        category: "Sequential VLSI Circuits",
+        domain: "SPICE",
+        duration: "3 Hours",
+        coMapped: ["CO3"],
+        tags: ["Transmission Gate", "D Flip-Flop", "Setup & Hold Time", "Clock-to-Q Delay"],
+        summary: "Implement a positive edge-triggered Master-Slave D Flip-Flop using CMOS transmission gates and measure setup time (t_setup), hold time (t_hold), and clock-to-Q delay (t_c2q).",
+        objectives: [
+          "To construct a CMOS Transmission Gate (TG) using complementary NMOS and PMOS switches.",
+          "To build a positive edge-triggered Master-Slave D Flip-Flop using two cascaded D-latches.",
+          "To verify edge-triggered state capture on the rising edge of the clock (CLK).",
+          "To characterize Clock-to-Q propagation delay (tc2q) and setup/hold timing windows."
+        ],
+        tools: [
+          { name: "Cadence Virtuoso", role: "Hierarchical Schematic Design", icon: "fa-layer-group" },
+          { name: "LTspice XVII", role: "Timing & Metastability Analysis", icon: "fa-clock" },
+          { name: "GPDK 180nm", role: "MOSFET Device Library", icon: "fa-microchip" }
+        ],
+        theory: `
+          <p class="mb-3">A <strong>Master-Slave D Flip-Flop</strong> prevents transparency (race-around condition) by cascading a negative-level-sensitive <em>Master Latch</em> with a positive-level-sensitive <em>Slave Latch</em> driven by complementary clocks (<code>CLK</code> and <code>CLK'</code>).</p>
+          <p class="mb-3">When <code>CLK = 0</code>, the Master transmission gate (TG1) is ON, sampling input <code>D</code> into the master feedback loop, while the Slave transmission gate (TG2) is OFF, holding the previous output <code>Q</code>. On the rising edge of <code>CLK</code> (0 &rarr; 1), TG1 turns OFF (isolating the master) and TG2 turns ON, propagating the captured value to output <code>Q</code>.</p>
+          <div class="bg-slate-900 text-amber-300 p-3.5 rounded-xl font-mono text-xs border border-slate-700 my-3">
+            Minimum Clock Period Constraint: &nbsp; T<sub>clk,min</sub> &ge; t<sub>c2q</sub> + t<sub>comb,max</sub> + t<sub>setup</sub>
+          </div>
+        `,
+        diagramSvg: `
+          <svg viewBox="0 0 480 180" class="w-full max-w-lg mx-auto bg-white rounded-xl border border-slate-200 p-3">
+            <text x="240" y="18" text-anchor="middle" font-family="Inter" font-size="12" font-weight="bold" fill="#0f172a">Transmission-Gate Master-Slave D Flip-Flop</text>
+            <!-- Input D -->
+            <text x="20" y="84" font-family="JetBrains Mono" font-size="12" font-weight="bold" fill="#0f172a">D</text>
+            <line x1="35" y1="80" x2="70" y2="80" stroke="#0f172a" stroke-width="2"/>
+            <!-- TG1 -->
+            <rect x="70" y="65" width="44" height="30" rx="5" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+            <text x="92" y="84" text-anchor="middle" font-family="JetBrains Mono" font-size="10" font-weight="bold" fill="#0369a1">TG1</text>
+            <text x="92" y="57" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#64748b">CLK'</text>
+            <!-- Master Latch -->
+            <line x1="114" y1="80" x2="145" y2="80" stroke="#0f172a" stroke-width="2"/>
+            <rect x="145" y="55" width="85" height="50" rx="6" fill="#f8fafc" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,2"/>
+            <text x="187" y="77" text-anchor="middle" font-family="Inter" font-size="10" font-weight="bold" fill="#334155">Master Latch</text>
+            <text x="187" y="92" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#64748b">(Cross-Inv)</text>
+            <!-- TG2 -->
+            <line x1="230" y1="80" x2="260" y2="80" stroke="#0f172a" stroke-width="2"/>
+            <rect x="260" y="65" width="44" height="30" rx="5" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+            <text x="282" y="84" text-anchor="middle" font-family="JetBrains Mono" font-size="10" font-weight="bold" fill="#047857">TG2</text>
+            <text x="282" y="57" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#64748b">CLK</text>
+            <!-- Slave Latch -->
+            <line x1="304" y1="80" x2="335" y2="80" stroke="#0f172a" stroke-width="2"/>
+            <rect x="335" y="55" width="85" height="50" rx="6" fill="#f8fafc" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,2"/>
+            <text x="377" y="77" text-anchor="middle" font-family="Inter" font-size="10" font-weight="bold" fill="#334155">Slave Latch</text>
+            <text x="377" y="92" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#64748b">(Cross-Inv)</text>
+            <!-- Output Q -->
+            <line x1="420" y1="80" x2="450" y2="80" stroke="#e11d48" stroke-width="2"/>
+            <text x="456" y="84" font-family="JetBrains Mono" font-size="12" font-weight="bold" fill="#e11d48">Q</text>
+            <!-- Bottom Clock Bar -->
+            <text x="180" y="148" font-family="JetBrains Mono" font-size="10" fill="#0f172a">Sampling on CLK=0 &rarr; Latching on CLK &uarr; (0&rarr;1)</text>
+          </svg>
+        `,
+        codeSnippets: [
+          {
+            title: "CMOS Transmission Gate Subcircuit (tg_dff.sp)",
+            language: "SPICE",
+            code: `* CMOS Transmission Gate Subcircuit Definition
+.SUBCKT TGATE in out clk clkb vdd gnd
+MN in clk  out gnd CMOSN W=0.4u L=0.18u
+MP in clkb out vdd CMOSP W=0.8u L=0.18u
+.ENDS TGATE
+
+* Master-Slave DFF Instantiation
+XINV_CLK clk clkb vdd gnd INV
+XTG1 d   m1   clkb clk vdd gnd TGATE
+XINV1 m1 m2   vdd gnd INV
+XTG2 m2  s1   clk clkb vdd gnd TGATE
+XINV2 s1 q_b  vdd gnd INV
+XINV3 q_b q   vdd gnd INV`
+          }
+        ],
+        procedure: [
+          "Create a reusable symbol for a static CMOS Inverter (<code>INV</code>) and a CMOS Transmission Gate (<code>TGATE</code>).",
+          "Assemble the Master-Slave D Flip-Flop schematic using two transmission gates and feedback inverters.",
+          "Apply a 100 MHz square-wave clock (<code>CLK</code>, period = 10ns) and a data pulse waveform (<code>D</code>).",
+          "Simulate for 50ns and verify that output <code>Q</code> updates strictly on the positive rising edge of <code>CLK</code>.",
+          "Measure the 50%-to-50% delay from <code>CLK</code> rising edge to <code>Q</code> transition (<code>tc2q</code>)."
+        ],
+        videoId: "f1lB957f5dY",
+        videoTitle: "Sequential VLSI Design: Latches, Flip-Flops & Setup/Hold Timing",
+        videoChannel: "VLSI System Design • Digital Integrated Circuits",
+        videoNotes: "Detailed walkthrough of transmission gate latches, clock skew effects, and setup/hold timing characterization."
+      },
+      {
+        id: 5,
+        code: "EXP-05",
+        title: "RTL Design & Testbench Verification of an 8-Bit ALU in Verilog HDL",
+        category: "Digital Front-End / FPGA RTL",
+        domain: "VERILOG",
+        duration: "3 Hours",
+        coMapped: ["CO4"],
+        tags: ["Verilog HDL", "8-Bit ALU", "Behavioral RTL", "Testbench", "Synthesis"],
+        summary: "Write synthesizable behavioral Verilog HDL code for an 8-bit Arithmetic Logic Unit supporting 8 arithmetic/logical operations with Zero and Carry flags, and verify via self-checking testbench.",
+        objectives: [
+          "To model an 8-bit combinational Arithmetic Logic Unit (ALU) using synthesizable Verilog HDL constructs.",
+          "To implement arithmetic (ADD, SUB, INC, DEC) and bitwise logical (AND, OR, XOR, NOT) operations.",
+          "To generate status flags including Carry-Out (Cout) and Zero Flag (Z).",
+          "To write a comprehensive Verilog testbench and inspect RTL simulation waveforms and synthesized gate-level netlist."
+        ],
+        tools: [
+          { name: "Xilinx Vivado", role: "RTL Synthesis & Behavioral Sim", icon: "fa-code" },
+          { name: "ModelSim / Questa", role: "Waveform Debugging", icon: "fa-terminal" },
+          { name: "Icarus Verilog", role: "Open-Source CLI Compiler", icon: "fa-laptop-code" }
+        ],
+        theory: `
+          <p class="mb-3">An <strong>Arithmetic Logic Unit (ALU)</strong> is the core computational block of a microprocessor datapath. In Register-Transfer Level (RTL) design, combinational ALUs are modeled using an <code>always @(*)</code> procedural block with a <code>case</code> statement controlled by an operation select bus (<code>opcode[2:0]</code>).</p>
+          <p class="mb-3">To prevent unintended latches during RTL synthesis, every output signal (<code>result</code>, <code>carry_out</code>, <code>zero_flag</code>) must be assigned a default value across all branches of the <code>case</code> construct.</p>
+          <div class="overflow-x-auto my-3">
+            <table class="w-full text-xs text-left border border-slate-200 rounded-lg overflow-hidden">
+              <thead class="bg-slate-100 text-slate-700 font-semibold">
+                <tr>
+                  <th class="px-3 py-2 border-b">Opcode [2:0]</th>
+                  <th class="px-3 py-2 border-b">Mnemonic</th>
+                  <th class="px-3 py-2 border-b">Operation</th>
+                  <th class="px-3 py-2 border-b">Description</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 font-mono">
+                <tr><td class="px-3 py-1.5">3'b000</td><td class="px-3 py-1.5 font-bold text-emerald-700">ADD</td><td class="px-3 py-1.5">{Cout, Y} = A + B</td><td class="px-3 py-1.5 font-sans">Unsigned Addition with Carry</td></tr>
+                <tr><td class="px-3 py-1.5">3'b001</td><td class="px-3 py-1.5 font-bold text-emerald-700">SUB</td><td class="px-3 py-1.5">{Cout, Y} = A - B</td><td class="px-3 py-1.5 font-sans">Subtraction with Borrow</td></tr>
+                <tr><td class="px-3 py-1.5">3'b010</td><td class="px-3 py-1.5 font-bold text-cyan-700">AND</td><td class="px-3 py-1.5">Y = A & B</td><td class="px-3 py-1.5 font-sans">Bitwise Logical AND</td></tr>
+                <tr><td class="px-3 py-1.5">3'b011</td><td class="px-3 py-1.5 font-bold text-cyan-700">OR</td><td class="px-3 py-1.5">Y = A | B</td><td class="px-3 py-1.5 font-sans">Bitwise Logical OR</td></tr>
+                <tr><td class="px-3 py-1.5">3'b100</td><td class="px-3 py-1.5 font-bold text-cyan-700">XOR</td><td class="px-3 py-1.5">Y = A ^ B</td><td class="px-3 py-1.5 font-sans">Bitwise Exclusive OR</td></tr>
+                <tr><td class="px-3 py-1.5">3'b101</td><td class="px-3 py-1.5 font-bold text-cyan-700">NOT</td><td class="px-3 py-1.5">Y = ~A</td><td class="px-3 py-1.5 font-sans">Bitwise Inversion of A</td></tr>
+                <tr><td class="px-3 py-1.5">3'b110</td><td class="px-3 py-1.5 font-bold text-purple-700">SHL</td><td class="px-3 py-1.5">Y = A << 1</td><td class="px-3 py-1.5 font-sans">Logical Shift Left by 1</td></tr>
+                <tr><td class="px-3 py-1.5">3'b111</td><td class="px-3 py-1.5 font-bold text-purple-700">SHR</td><td class="px-3 py-1.5">Y = A >> 1</td><td class="px-3 py-1.5 font-sans">Logical Shift Right by 1</td></tr>
+              </tbody>
+            </table>
+          </div>
+        `,
+        diagramSvg: `
+          <svg viewBox="0 0 420 200" class="w-full max-w-md mx-auto bg-white rounded-xl border border-slate-200 p-3">
+            <text x="210" y="18" text-anchor="middle" font-family="Inter" font-size="12" font-weight="bold" fill="#0f172a">8-Bit Arithmetic Logic Unit (ALU) Block Symbol</text>
+            <!-- ALU Trapezoid -->
+            <polygon points="150,35 260,65 260,135 150,165 150,115 172,100 150,85" fill="#0f172a" stroke="#10b981" stroke-width="2.5"/>
+            <text x="212" y="104" text-anchor="middle" font-family="JetBrains Mono" font-size="13" font-weight="bold" fill="#ffffff">8-BIT ALU</text>
+            <!-- Inputs -->
+            <line x1="75" y1="60" x2="150" y2="60" stroke="#0f172a" stroke-width="2"/>
+            <text x="45" y="64" font-family="JetBrains Mono" font-size="11" font-weight="bold" fill="#0f172a">A[7:0]</text>
+            <line x1="75" y1="140" x2="150" y2="140" stroke="#0f172a" stroke-width="2"/>
+            <text x="45" y="144" font-family="JetBrains Mono" font-size="11" font-weight="bold" fill="#0f172a">B[7:0]</text>
+            <!-- Opcode -->
+            <line x1="205" y1="150" x2="205" y2="180" stroke="#0284c7" stroke-width="2"/>
+            <text x="205" y="193" text-anchor="middle" font-family="JetBrains Mono" font-size="11" font-weight="bold" fill="#0284c7">Opcode[2:0]</text>
+            <!-- Outputs -->
+            <line x1="260" y1="85" x2="335" y2="85" stroke="#059669" stroke-width="2"/>
+            <text x="342" y="89" font-family="JetBrains Mono" font-size="11" font-weight="bold" fill="#059669">Y[7:0]</text>
+            <line x1="260" y1="115" x2="335" y2="115" stroke="#e11d48" stroke-width="2"/>
+            <text x="342" y="119" font-family="JetBrains Mono" font-size="11" font-weight="bold" fill="#e11d48">Cout, Zero</text>
+          </svg>
+        `,
+        codeSnippets: [
+          {
+            title: "Synthesizable 8-Bit ALU RTL Design (alu_8bit.v)",
+            language: "Verilog",
+            code: `module alu_8bit (
+    input  wire [7:0] a,
+    input  wire [7:0] b,
+    input  wire [2:0] opcode,
+    output reg  [7:0] y,
+    output reg        cout,
+    output wire       zero
+);
+
+    always @(*) begin
+        cout = 1'b0;
+        case (opcode)
+            3'b000: {cout, y} = a + b;        // ADD
+            3'b001: {cout, y} = a - b;        // SUB
+            3'b010: y = a & b;                // Bitwise AND
+            3'b011: y = a | b;                // Bitwise OR
+            3'b100: y = a ^ b;                // Bitwise XOR
+            3'b101: y = ~a;                   // Bitwise NOT
+            3'b110: {cout, y} = {a, 1'b0};    // Shift Left
+            3'b111: {y, cout} = {1'b0, a};    // Shift Right
+            default: y = 8'h00;
+        endcase
+    end
+
+    assign zero = (y == 8'h00);
+endmodule`
+          },
+          {
+            title: "8-Bit ALU Self-Checking Testbench (tb_alu_8bit.v)",
+            language: "Verilog",
+            code: `\`timescale 1ns / 1ps
+module tb_alu_8bit;
+    reg  [7:0] a, b;
+    reg  [2:0] opcode;
+    wire [7:0] y;
+    wire       cout, zero;
+
+    alu_8bit dut (.a(a), .b(b), .opcode(opcode), .y(y), .cout(cout), .zero(zero));
+
+    integer i;
+    initial begin
+        a = 8'h25; b = 8'h15;
+        for (i = 0; i < 8; i = i + 1) begin
+            opcode = i[2:0];
+            #10;
+        end
+        // Test Zero Flag
+        a = 8'h42; b = 8'h42; opcode = 3'b001; #10;
+        $finish;
+    end
+endmodule`
+          }
+        ],
+        procedure: [
+          "Open Xilinx Vivado / ModelSim and create a new RTL project targeting an Artix-7 FPGA or generic standard-cell library.",
+          "Create the design source file <code>alu_8bit.v</code> and enter the behavioral Verilog module.",
+          "Create a simulation testbench <code>tb_alu_8bit.v</code> applying test vectors (e.g., A = 8'h25, B = 8'h15) across all 8 opcodes.",
+          "Run Behavioral Simulation, inspect timing waveforms in radix hexadecimal, and verify Carry and Zero flags.",
+          "Run <strong>RTL Synthesis</strong> and open the Schematic Viewer to examine inferred adders, multiplexers, and logic gates."
+        ],
+        videoId: "f1lB957f5dY",
+        videoTitle: "Verilog HDL Tutorial: Designing & Simulating an ALU with Testbench",
+        videoChannel: "FPGA & Digital Design Academy",
+        videoNotes: "Covers combinational always blocks, avoiding inferred latches, and writing self-checking Verilog testbenches."
+      },
+      {
+        id: 6,
+        code: "EXP-06",
+        title: "Finite State Machine (FSM) Sequence Detector Design in Verilog",
+        category: "Sequential RTL & Control Path",
+        domain: "VERILOG",
+        duration: "3 Hours",
+        coMapped: ["CO3", "CO4"],
+        tags: ["Mealy & Moore FSM", "Sequence Detector", "State Encoding", "Synchronous Reset"],
+        summary: "Design, simulate, and synthesize an overlapping '1011' sequence detector using Mealy and Moore Finite State Machine architectures in Verilog HDL.",
+        objectives: [
+          "To derive state transition diagrams and state tables for overlapping '1011' sequence detection.",
+          "To implement a clean 3-block (State Register, Next-State Logic, Output Logic) Moore/Mealy FSM in Verilog.",
+          "To compare output latency (1-cycle delay in Moore vs immediate combinational response in Mealy).",
+          "To synthesize the FSM and verify state encoding (Binary vs One-Hot) in the synthesis report."
+        ],
+        tools: [
+          { name: "Xilinx Vivado", role: "FSM Synthesis & State Viewer", icon: "fa-diagram-project" },
+          { name: "ModelSim", role: "Cycle-Accurate Simulation", icon: "fa-terminal" },
+          { name: "GTKWave", role: "VCD Waveform Inspection", icon: "fa-wave-square" }
+        ],
+        theory: `
+          <p class="mb-3">A <strong>Finite State Machine (FSM)</strong> models sequential control logic using a finite number of states, transitions, and outputs:</p>
+          <ul class="list-disc pl-5 space-y-1.5 mb-3">
+            <li><strong>Moore Machine:</strong> Outputs depend <em>solely</em> on the present state (<code>Output = f(State)</code>). Outputs are synchronous and glitch-free, but require an extra state (5 states for a 4-bit sequence) and exhibit a one-clock-cycle latency.</li>
+            <li><strong>Mealy Machine:</strong> Outputs depend on both the present state and current inputs (<code>Output = f(State, Input)</code>). Requires fewer states (4 states for '1011') and asserts the detection flag immediately during the final bit cycle.</li>
+          </ul>
+        `,
+        diagramSvg: `
+          <svg viewBox="0 0 480 155" class="w-full max-w-lg mx-auto bg-white rounded-xl border border-slate-200 p-3">
+            <text x="240" y="18" text-anchor="middle" font-family="Inter" font-size="12" font-weight="bold" fill="#0f172a">Mealy Overlapping '1011' Sequence Detector States</text>
+            <!-- States -->
+            <circle cx="70" cy="85" r="24" fill="#f1f5f9" stroke="#0f172a" stroke-width="2"/>
+            <text x="70" y="89" text-anchor="middle" font-family="JetBrains Mono" font-size="11" font-weight="bold">S0</text>
+
+            <circle cx="185" cy="85" r="24" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+            <text x="185" y="89" text-anchor="middle" font-family="JetBrains Mono" font-size="11" font-weight="bold" fill="#0369a1">S1 (1)</text>
+
+            <circle cx="300" cy="85" r="24" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+            <text x="300" y="89" text-anchor="middle" font-family="JetBrains Mono" font-size="11" font-weight="bold" fill="#b45309">S2 (10)</text>
+
+            <circle cx="415" cy="85" r="24" fill="#d1fae5" stroke="#059669" stroke-width="2.5"/>
+            <text x="415" y="89" text-anchor="middle" font-family="JetBrains Mono" font-size="10" font-weight="bold" fill="#047857">S3 (101)</text>
+
+            <!-- Forward Transitions -->
+            <line x1="94" y1="85" x2="158" y2="85" stroke="#0f172a" stroke-width="1.8"/>
+            <text x="126" y="78" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#0f172a">1 / 0</text>
+
+            <line x1="209" y1="85" x2="273" y2="85" stroke="#0f172a" stroke-width="1.8"/>
+            <text x="241" y="78" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#0f172a">0 / 0</text>
+
+            <line x1="324" y1="85" x2="388" y2="85" stroke="#0f172a" stroke-width="1.8"/>
+            <text x="356" y="78" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#0f172a">1 / 0</text>
+
+            <!-- Overlap Return S3 -> S1 on 1/1 -->
+            <path d="M 415 109 Q 300 152 185 109" fill="none" stroke="#e11d48" stroke-width="1.8" stroke-dasharray="4,2"/>
+            <text x="300" y="144" text-anchor="middle" font-family="JetBrains Mono" font-size="10" font-weight="bold" fill="#e11d48">Overlap Detection: 1 / 1 (Detected!)</text>
+          </svg>
+        `,
+        codeSnippets: [
+          {
+            title: "Mealy '1011' Sequence Detector (seq_detector_1011.v)",
+            language: "Verilog",
+            code: `module seq_detector_1011 (
+    input  wire clk,
+    input  wire rst_n,
+    input  wire din,
+    output reg  dout
+);
+    localparam [1:0] S0 = 2'b00, S1 = 2'b01, S2 = 2'b10, S3 = 2'b11;
+    reg [1:0] state, next_state;
+
+    // 1. Sequential State Register
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) state <= S0;
+        else        state <= next_state;
+    end
+
+    // 2. Combinational Next-State & Output Logic (Mealy)
+    always @(*) begin
+        next_state = state;
+        dout       = 1'b0;
+        case (state)
+            S0: next_state = din ? S1 : S0;
+            S1: next_state = din ? S1 : S2;
+            S2: next_state = din ? S3 : S0;
+            S3: begin
+                if (din) begin
+                    next_state = S1; // Overlapping '1'
+                    dout       = 1'b1;
+                end else
+                    next_state = S2;
+            end
+        endcase
+    end
+endmodule`
+          }
+        ],
+        procedure: [
+          "Construct the state transition diagram for detecting the serial bit stream <code>1011</code> with overlap.",
+          "Implement the 2-always-block Mealy FSM in <code>seq_detector_1011.v</code> using non-blocking (<code>&lt;</code>=) assignments for state registers and blocking (<code>=</code>) assignments for next-state logic.",
+          "Apply a serial bit stream containing overlapping patterns (e.g., <code>010110110</code>) in the testbench.",
+          "Verify in the waveform viewer that <code>dout</code> pulses HIGH for one clock cycle upon receiving the fourth bit of each <code>1011</code> pattern."
+        ],
+        videoId: "f1lB957f5dY",
+        videoTitle: "Designing Mealy & Moore Finite State Machines in Verilog",
+        videoChannel: "Digital VLSI & RTL Architecture",
+        videoNotes: "Explains coding guidelines for synthesizable FSMs, state encoding strategies, and overlapping bit detection."
+      },
+      {
+        id: 7,
+        code: "EXP-07",
+        title: "Physical Layout, DRC, LVS & Post-Layout Extraction of CMOS Inverter",
+        category: "Physical Design / Back-End VLSI",
+        domain: "LAYOUT",
+        duration: "3 Hours",
+        coMapped: ["CO5"],
+        tags: ["Stick Diagram", "Physical Layout", "DRC & LVS", "Parasitic Extraction"],
+        summary: "Translate a CMOS inverter schematic into a mask-level physical layout using standard layers (N-well, Active, Poly, Metal1, Contact), and run DRC, LVS, and RC extraction.",
+        objectives: [
+          "To sketch an area-efficient Euler-path Stick Diagram for a static CMOS inverter.",
+          "To draw physical mask polygons (N-well, P-select, N-select, Oxide/Active, Poly, Contact, Metal1) adhering to &lambda;-based or foundry design rules.",
+          "To execute Design Rule Check (DRC) to eliminate spacing, width, and enclosure violations.",
+          "To perform Layout Versus Schematic (LVS) verification and Parasitic RC Extraction (PEX) for post-layout simulation."
+        ],
+        tools: [
+          { name: "Cadence Virtuoso Layout", role: "Polygon Mask Editor", icon: "fa-border-all" },
+          { name: "Assura / Calibre", role: "DRC, LVS & PEX Signoff", icon: "fa-check-double" },
+          { name: "Magic VLSI", role: "Open-Source Layout & Extraction", icon: "fa-wand-magic-sparkles" }
+        ],
+        theory: `
+          <p class="mb-3"><strong>Physical Layout Design</strong> translates a transistor-level schematic into geometric mask layers fabricated on a silicon wafer via photolithography.</p>
+          <ul class="list-disc pl-5 space-y-1.5 mb-3">
+            <li><strong>Design Rule Check (DRC):</strong> Verifies that all drawn polygons satisfy minimum feature width, minimum spacing, and layer overlap/enclosure rules (e.g., minimum Poly gate length = <code>2&lambda;</code>, Poly extension beyond active = <code>2&lambda;</code>) to ensure high manufacturing yield.</li>
+            <li><strong>Layout Versus Schematic (LVS):</strong> Extracts devices and connectivity nets from the layout polygons and compares the extracted netlist against the golden schematic netlist to confirm 100% electrical equivalence.</li>
+            <li><strong>Parasitic Extraction (PEX / RCX):</strong> Extracts interconnect resistance (<code>R</code>) and fringe/coupling capacitance (<code>C</code>), enabling accurate post-layout timing signoff.</li>
+          </ul>
+        `,
+        diagramSvg: `
+          <svg viewBox="0 0 420 220" class="w-full max-w-md mx-auto bg-white rounded-xl border border-slate-200 p-3">
+            <text x="210" y="16" text-anchor="middle" font-family="Inter" font-size="11" font-weight="bold" fill="#0f172a">CMOS Inverter Mask Layer Cross-View (Top Layout)</text>
+            <!-- N-Well Box -->
+            <rect x="85" y="26" width="250" height="72" rx="6" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.5" stroke-dasharray="4,2"/>
+            <text x="325" y="38" text-anchor="end" font-family="JetBrains Mono" font-size="9" font-weight="bold" fill="#a16207">N-WELL</text>
+
+            <!-- VDD Metal 1 Rail -->
+            <rect x="75" y="32" width="270" height="14" rx="2" fill="#3b82f6" opacity="0.85"/>
+            <text x="82" y="42" font-family="JetBrains Mono" font-size="9" font-weight="bold" fill="#ffffff">METAL 1 (VDD)</text>
+
+            <!-- PMOS Active (P+) -->
+            <rect x="155" y="54" width="110" height="32" rx="3" fill="#fde047" stroke="#eab308" stroke-width="1.5"/>
+            <text x="160" y="65" font-family="JetBrains Mono" font-size="8" fill="#854d0e">P+ Active</text>
+
+            <!-- NMOS Active (N+) -->
+            <rect x="165" y="132" width="90" height="26" rx="3" fill="#bbf7d0" stroke="#16a34a" stroke-width="1.5"/>
+            <text x="170" y="143" font-family="JetBrains Mono" font-size="8" fill="#166534">N+ Active</text>
+
+            <!-- Vertical Polysilicon Gate -->
+            <rect x="203" y="48" width="14" height="118" rx="2" fill="#ef4444" opacity="0.9"/>
+            <text x="223" y="112" font-family="JetBrains Mono" font-size="9" font-weight="bold" fill="#dc2626">POLY GATE (Vin)</text>
+
+            <!-- Output Metal 1 Strap -->
+            <rect x="242" y="60" width="14" height="92" rx="2" fill="#3b82f6" opacity="0.85"/>
+            <text x="262" y="112" font-family="JetBrains Mono" font-size="9" font-weight="bold" fill="#2563eb">M1 (Vout)</text>
+
+            <!-- Contacts -->
+            <rect x="172" y="64" width="8" height="8" fill="#0f172a"/>
+            <rect x="245" y="64" width="8" height="8" fill="#0f172a"/>
+            <rect x="175" y="141" width="8" height="8" fill="#0f172a"/>
+            <rect x="245" y="141" width="8" height="8" fill="#0f172a"/>
+
+            <!-- GND Metal 1 Rail -->
+            <rect x="75" y="176" width="270" height="14" rx="2" fill="#3b82f6" opacity="0.85"/>
+            <text x="82" y="186" font-family="JetBrains Mono" font-size="9" font-weight="bold" fill="#ffffff">METAL 1 (GND)</text>
+          </svg>
+        `,
+        codeSnippets: [
+          {
+            title: "Magic VLSI Layout Automation Script (inv_layout.tcl)",
+            language: "TCL",
+            code: `# Magic VLSI Layout Automation & Extraction Commands
+tech load scmos
+grid 1lambda
+
+# Draw N-Well & Power Rails
+box 0 20 30 45
+paint nwell
+box 0 40 30 44
+paint metal1
+label VDD
+
+box 0 0 30 4
+paint metal1
+label GND
+
+# Run DRC & Parasitic Extraction
+drc check
+drc why
+extract all
+ext2spice lvs
+ext2spice -o inv_postlayout.spice`
+          }
+        ],
+        procedure: [
+          "Open Virtuoso Layout Suite (or Magic VLSI) and instantiate parameterized cells (PCells) for the PMOS and NMOS transistors from the schematic.",
+          "Place the PMOS inside an <strong>N-Well</strong> near the top <code>VDD</code> Metal-1 rail and the NMOS near the bottom <code>GND</code> Metal-1 rail.",
+          "Route the shared gate using <strong>Polysilicon</strong>, the shared drains using <strong>Metal-1</strong>, and place substrate/well tap contacts (<code>ntap</code>, <code>ptap</code>) to prevent latch-up.",
+          "Run <strong>DRC</strong> and resolve any spacing, minimum width, or metal enclosure warnings until <em>0 DRC Errors</em> are achieved.",
+          "Run <strong>LVS</strong> to verify schematic-to-layout equivalence, extract parasitic R/C values, and compare pre-layout vs post-layout propagation delays."
+        ],
+        videoId: "f1lB957f5dY",
+        videoTitle: "CMOS Inverter Stick Diagram, Physical Layout, DRC & LVS Walkthrough",
+        videoChannel: "Physical Design & VLSI Back-End",
+        videoNotes: "Step-by-step demonstration of drawing N-well, diffusion, poly, contacts, and passing DRC/LVS signoff."
+      }
+    ];
+
+    // =========================================================================
+    // 3. STATE & NAVIGATION ROUTER (INDEX VIEW VS EXPERIMENT DETAIL VIEW)
+    // =========================================================================
+    let currentView = { page: 'home', expId: null };
+    let searchQuery = '';
+    let selectedCategory = 'ALL';
+
+    function navigateToHome() {
+      currentView = { page: 'home', expId: null };
+      renderApp();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function navigateToExperiment(expId) {
+      currentView = { page: 'detail', expId: Number(expId) };
+      renderApp();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+// code to download lab manual from user supplied PDF
+    function downloadExperimentPdf(expId) {
+  const exp = EXPERIMENTS.find(e => e.id === expId);
+  if (!exp || !exp.pdfFile) {
+    showToast('PDF manual not attached for this experiment.', 'info');
+    return;
+  }
+
+  const a = document.createElement('a');
+  a.href = exp.pdfFile;
+  a.download = `${labInfo.courseCode}_${exp.code}.pdf`; // Suggested filename when saved
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  showToast(`Downloading ${exp.code} PDF Manual...`);
+}
+
+    // =========================================================================
+    // 4. TOAST NOTIFICATIONS & CLIPBOARD HELPERS (SUPPORTS MULTIPLE SNIPPETS)
+    // =========================================================================
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const bgClass = type === 'success'
+        ? 'bg-slate-900 text-white border-emerald-500'
+        : 'bg-slate-900 text-white border-cyan-500';
+
+      toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl border-l-4 shadow-xl text-xs font-medium fade-in ${bgClass}`;
+      toast.innerHTML = `
+        <i class="fa-solid ${type === 'success' ? 'fa-circle-check text-emerald-400' : 'fa-circle-info text-cyan-400'} text-sm"></i>
+        <span>${message}</span>
+      `;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(6px)';
+        toast.style.transition = 'all 0.25s ease';
+        setTimeout(() => toast.remove(), 250);
+      }, 3000);
+    }
+
+    function copyCodeSnippet(expId, snippetIdx = 0) {
+      const exp = EXPERIMENTS.find(e => e.id === expId);
+      if (!exp || !exp.codeSnippets || !exp.codeSnippets[snippetIdx]) return;
+
+      const snippet = exp.codeSnippets[snippetIdx];
+      const textArea = document.createElement('textarea');
+      textArea.value = snippet.code;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        showToast(`${snippet.title} (${snippet.language}) copied to clipboard!`);
+      } catch (err) {
+        showToast('Unable to copy code automatically.', 'info');
+      }
+      document.body.removeChild(textArea);
+    }
+
+    // =========================================================================
+    // 5. DOWNLOAD LAB MANUAL GENERATOR (INCLUDES ALL CODE SNIPPETS)
+    // =========================================================================
+    function downloadLabManual(expId) {
+      const exp = EXPERIMENTS.find(e => e.id === expId);
+      if (!exp) return;
+
+      const snippetsHtml = (exp.codeSnippets || []).map(snip => `
+        <h3 style="font-size: 13px; font-weight: 700; color: #334155; margin: 14px 0 6px 0;">${snip.title} (${snip.language})</h3>
+        <pre>${snip.code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+      `).join('');
+
+      const manualHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>${exp.code}: ${exp.title} - Lab Manual</title>
+<style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1e293b; line-height: 1.6; max-width: 820px; margin: 30px auto; padding: 0 24px; }
+  .header { border-bottom: 3px solid #0f172a; padding-bottom: 14px; margin-bottom: 24px; }
+  .univ { font-size: 18px; font-weight: 800; color: #0f172a; text-transform: uppercase; }
+  .dept { font-size: 14px; font-weight: 600; color: #047857; margin-top: 2px; }
+  .meta { font-size: 12px; color: #475569; margin-top: 6px; }
+  .exp-banner { background: #f1f5f9; border-left: 5px solid #059669; padding: 14px 18px; margin-bottom: 22px; }
+  .exp-code { font-size: 12px; font-weight: 700; color: #059669; letter-spacing: 0.05em; }
+  .exp-title { font-size: 20px; font-weight: 700; color: #0f172a; margin: 4px 0; }
+  h2 { font-size: 15px; text-transform: uppercase; letter-spacing: 0.04em; color: #0f172a; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; margin-top: 24px; }
+  ul, ol { padding-left: 22px; }
+  li { margin-bottom: 6px; }
+  pre { background: #0f172a; color: #e2e8f0; padding: 14px; border-radius: 6px; font-size: 12px; overflow-x: auto; margin-top: 4px; }
+  .tools { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tool-badge { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+  .sign-box { margin-top: 40px; border-top: 1px dashed #94a3b8; padding-top: 16px; display: flex; justify-content: space-between; font-size: 12px; color: #475569; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="univ">${labInfo.university}</div>
+    <div class="dept">${labInfo.department}</div>
+    <div class="meta"><strong>Course:</strong> ${labInfo.labName} (${labInfo.courseCode}) &nbsp;|&nbsp; ${labInfo.semester}</div>
+  </div>
+
+  <div class="exp-banner">
+    <div class="exp-code">EXPERIMENT ${exp.id} (${exp.code}) • Mapped COs: ${exp.coMapped.join(', ')} • Duration: ${exp.duration}</div>
+    <div class="exp-title">${exp.title}</div>
+  </div>
+
+  <h2>1. Objective</h2>
+  <ul>
+    ${exp.objectives.map(obj => `<li>${obj}</li>`).join('')}
+  </ul>
+
+  <h2>2. EDA Tools & Software Required</h2>
+  <div class="tools">
+    ${exp.tools.map(t => `<span class="tool-badge">${t.name} (${t.role})</span>`).join('')}
+  </div>
+
+  <h2>3. Theoretical Background</h2>
+  <div>${exp.theory}</div>
+
+  <h2>4. Reference Verilog Code (Design and Testbench)</h2>
+  ${snippetsHtml}
+
+  <h2>5. Step-by-Step Laboratory Procedure</h2>
+  <ol>
+    ${exp.procedure.map(step => `<li>${step}</li>`).join('')}
+  </ol>
+  
+<h2>6. RTL Schematic</h2>
+  <p style="border: 1px solid #cbd5e1; height: 90px; border-radius: 6px; padding: 10px; color: #94a3b8; font-size: 12px;">
+    [Paste RTL schematic obtained from RTL analysis-> Open Elaborated Design -> Schematic]
+  </p>
+
+  <h2>7. Simulated Waveform</h2>
+  <p style="border: 1px solid #cbd5e1; height: 90px; border-radius: 6px; padding: 10px; color: #94a3b8; font-size: 12px;">
+    [Paste RTL schematic obtained from RTL analysis-> Open Elaborated Design -> Schematic]
+  </p>
+
+  <h2>8.Hardware Utilization and Power/Timing Report </h2>
+  <p style="border: 1px solid #cbd5e1; height: 90px; border-radius: 6px; padding: 10px; color: #94a3b8; font-size: 12px;">
+    [Report Utilization, timing and power]
+  </p>
+
+  <h2>9. Observation & Conclusion</h2>
+  <p style="border: 1px solid #cbd5e1; height: 90px; border-radius: 6px; padding: 10px; color: #94a3b8; font-size: 12px;">
+    [Student Observation Notes and conclusion ]
+  </p>
+
+  <div class="sign-box">
+    <span>Student Name & Roll No.: ___________________________</span>
+    <span>Faculty Signature & Date: ___________________________</span>
+  </div>
+</body>
+</html>`;
+
+      const blob = new Blob([manualHtml], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${labInfo.courseCode}_${exp.code}_Lab_Manual.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast(`Downloaded Lab Manual: ${labInfo.courseCode}_${exp.code}_Lab_Manual.html`);
+    }
+
+    // =========================================================================
+    // 6. SYNC HEADER AND FOOTER METADATA
+    // =========================================================================
+    function syncHeaderAndFooter() {
+      document.getElementById('nav-course-code').textContent = labInfo.courseCode;
+      document.getElementById('nav-lab-title').textContent = labInfo.labName;
+      document.getElementById('nav-dept-title').textContent = labInfo.department;
+      document.getElementById('footer-lab-name').textContent = `${labInfo.labName} (${labInfo.courseCode})`;
+      document.getElementById('footer-univ-name').textContent = labInfo.university;
+    }
+
+    // =========================================================================
+    // 7. FILTERING HELPERS FOR INDEX VIEW
+    // =========================================================================
+    function handleSearch(val) {
+      searchQuery = val.toLowerCase();
+      renderExperimentsGrid();
+    }
+
+    function handleCategoryFilter(cat) {
+      selectedCategory = cat;
+      renderApp();
+    }
+
+    function getFilteredExperiments() {
+      return EXPERIMENTS.filter(exp => {
+        const matchesSearch =
+          exp.title.toLowerCase().includes(searchQuery) ||
+          exp.code.toLowerCase().includes(searchQuery) ||
+          exp.tags.some(t => t.toLowerCase().includes(searchQuery)) ||
+          exp.summary.toLowerCase().includes(searchQuery);
+
+        const matchesCat =
+          selectedCategory === 'ALL' ||
+          exp.domain === selectedCategory;
+
+        return matchesSearch && matchesCat;
+      });
+    }
+
+    // =========================================================================
+    // 8. RENDER INDEX (HOME) VIEW
+    // =========================================================================
+    function renderHomeView() {
+      const spiceCount = EXPERIMENTS.filter(e => e.domain === 'SPICE').length;
+      const verilogCount = EXPERIMENTS.filter(e => e.domain === 'VERILOG').length;
+      const layoutCount = EXPERIMENTS.filter(e => e.domain === 'LAYOUT').length;
+
+      const categories = [
+        { id: 'ALL', label: `All Experiments (${EXPERIMENTS.length})` },
+        { id: 'SPICE', label: `CMOS & SPICE (${spiceCount})` },
+        { id: 'VERILOG', label: `Verilog RTL & FPGA (${verilogCount})` },
+        { id: 'LAYOUT', label: `Physical Layout (${layoutCount})` }
+      ];
+
+      return `
+        <div class="fade-in">
+          <!-- Hero Section: University, Department, Lab Name & Course Code -->
+          <section class="circuit-pattern text-white border-b border-slate-800 relative overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 relative z-10">
+              <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+                <div class="max-w-3xl">
+                  <!-- University & Department Badge -->
+                  <div class="inline-flex flex-wrap items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/90 border border-slate-700 text-xs font-medium text-emerald-300 mb-4">
+                    <i class="fa-solid fa-building-columns text-emerald-400"></i>
+                    <span>${labInfo.university}</span>
+                  </div>
+
+                  <p class="text-sm sm:text-base font-semibold text-cyan-400 tracking-wide uppercase mb-1.5">
+                    ${labInfo.department}
+                  </p>
+
+                  <div class="flex flex-wrap items-center gap-3 sm:gap-4 mb-4">
+                    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white">
+                      ${labInfo.labName}
+                    </h1>
+                    <span class="font-mono text-base sm:text-xl font-bold px-3.5 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 shadow-inner">
+                      ${labInfo.courseCode}
+                    </span>
+                  </div>
+
+                  <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl mb-6">
+                    The Course Learning Objectives (CLO) of the VLSI Design Lab (EC-39006) aim to provide hands-on experience in modern digital and analog integrated circuit design 
+                    using industry-standard EDA tools and FPGA platforms. Key objectives include:
+                    (1) <strong>HDL &amp; System Modeling:</strong> Master structural, data-flow, and behavioral modeling in Verilog HDL to design combinational and sequential digital systems.
+                    (2) <strong>FPGA Prototyping:</strong> Implement, simulate, and debug digital logic on FPGA platforms using Xilinx Vivado, Integrated Logic Analyzer (ILA), and IP cores.
+                    (3) <strong>CMOS Transistor-Level Analysis:</strong> Characterize NMOS/CMOS inverters in Cadence Virtuoso by analyzing Voltage Transfer Characteristics (VTC), noise margins, transient responses, capacitive loads, and delay metrics.
+                    (4) <strong>Logic &amp; Memory Design:</strong> Construct complex CMOS combinational gates (NAND, NOR) and model semiconductor memory units such as Single-Port RAM.
+                    (5) <strong>Verification &amp; Synthesis:</strong> Perform functional verification of finite-state machines (FSMs) in Cadence Xcelium and execute logic synthesis using standard cell libraries in Cadence Genus.
+                  </p>
+
+                  <div class="flex flex-wrap items-center gap-3 text-xs text-slate-300">
+                    <span class="px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-700/80 flex items-center gap-2">
+                      <i class="fa-solid fa-graduation-cap text-emerald-400"></i>
+                      ${labInfo.semester}
+                    </span>
+                    <a href="#experiments-section" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold transition flex items-center gap-2 shadow-lg shadow-emerald-600/20">
+                      <span>Explore Experiments</span>
+                      <i class="fa-solid fa-arrow-down"></i>
+                    </a>
+                    <a href="#course-outcomes-section" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold border border-slate-700 transition">
+                      View Course Outcomes
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Right Side Quick Lab Metrics Card -->
+                <div class="bg-slate-900/85 backdrop-blur-md border border-slate-700/80 rounded-2xl p-5 sm:p-6 lg:w-80 shrink-0 shadow-2xl">
+                  <div class="text-xs font-mono uppercase tracking-wider text-slate-400 mb-3 flex items-center justify-between">
+                    <span>Lab Curriculum Overview</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  </div>
+                  <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3">
+                      <div class="text-2xl font-extrabold text-white">${EXPERIMENTS.length}</div>
+                      <div class="text-[11px] text-slate-400">Core Experiments</div>
+                    </div>
+                    <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3">
+                      <div class="text-2xl font-extrabold text-emerald-400">${COURSE_OUTCOMES.length}</div>
+                      <div class="text-[11px] text-slate-400">Course Outcomes</div>
+                    </div>
+                  </div>
+                  <div class="space-y-2 text-xs text-slate-300 border-t border-slate-800 pt-3">
+                    <div class="flex items-center justify-between">
+                      <span class="text-slate-400">EDA Suite:</span>
+                      <span class="font-mono text-cyan-300">Virtuoso / Vivado</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span class="text-slate-400">Tech Node:</span>
+                      <span class="font-mono text-emerald-300">180nm / 45nm CMOS</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span class="text-slate-400">Manuals & Videos:</span>
+                      <span class="text-white font-medium">Included per Expt</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Section 1: List of Experiments -->
+          <section id="experiments-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+              <div>
+                <div class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-700 mb-1">
+                  <i class="fa-solid fa-flask"></i>
+                  <span>Laboratory Syllabus & Modules</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">List of Experiments</h2>
+                <p class="text-sm text-slate-500 mt-1">Select any experiment to view objectives, EDA tools, circuit/Verilog theory, downloadable lab manual, and video tutorial.</p>
+              </div>
+
+              <!-- Search Input -->
+              <div class="relative w-full md:w-72">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input
+                  type="text"
+                  value="${searchQuery}"
+                  oninput="handleSearch(this.value)"
+                  placeholder="Search CMOS, Verilog, ALU, Layout..."
+                  class="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm"
+                />
+              </div>
+            </div>
+
+            <!-- Domain Filter Pills -->
+            <div class="flex flex-wrap items-center gap-2 mb-6">
+              ${categories.map(cat => {
+                const active = selectedCategory === cat.id;
+                return `
+                  <button
+                    onclick="handleCategoryFilter('${cat.id}')"
+                    class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition border ${
+                      active
+                        ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                    }"
+                  >
+                    ${cat.label}
+                  </button>
+                `;
+              }).join('')}
+            </div>
+
+            <!-- Experiments Grid Container -->
+            <div id="experiments-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              ${renderExperimentCardsHtml()}
+            </div>
+          </section>
+
+          <!-- Section 2: Course Outcomes (COs) -->
+          <section id="course-outcomes-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-6">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+              <div class="p-6 sm:p-8 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/70">
+                <div>
+                  <div class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-cyan-700 mb-1">
+                    <i class="fa-solid fa-bullseye"></i>
+                    <span>OBE Curriculum Mapping</span>
+                  </div>
+                  <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Course Outcomes (COs)</h2>
+                  <p class="text-xs sm:text-sm text-slate-500 mt-1">Upon successful completion of <strong>${labInfo.labName} (${labInfo.courseCode})</strong>, students will be able to:</p>
+                </div>
+                <span class="self-start sm:self-center px-3 py-1.5 rounded-lg bg-slate-900 text-white font-mono text-xs font-semibold">
+                  CO1 – CO6 • Bloom's Taxonomy
+                </span>
+              </div>
+
+              <div class="divide-y divide-slate-100">
+                ${COURSE_OUTCOMES.map(co => `
+                  <div class="p-5 sm:px-8 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 hover:bg-slate-50/90 transition">
+                    <div class="flex items-center gap-3 shrink-0 sm:w-44">
+                      <span class="w-12 h-9 rounded-xl bg-slate-900 text-emerald-400 font-mono font-bold text-sm flex items-center justify-center shadow-sm">
+                        ${co.id}
+                      </span>
+                      <span class="px-2.5 py-1 rounded-lg text-[11px] font-semibold border ${co.badgeColor}">
+                        ${co.bloom}
+                      </span>
+                    </div>
+                    <p class="text-sm text-slate-700 leading-relaxed">
+                      ${co.statement}
+                    </p>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </section>
+        </div>
+      `;
+    }
+
+    function renderExperimentCardsHtml() {
+      const list = getFilteredExperiments();
+      if (list.length === 0) {
+        return `
+          <div class="col-span-full bg-white rounded-2xl border border-slate-200 p-10 text-center">
+            <i class="fa-solid fa-microchip text-3xl text-slate-300 mb-3"></i>
+            <h3 class="text-base font-bold text-slate-800">No matching experiments found</h3>
+            <p class="text-xs text-slate-500 mt-1">Try clearing your search filter or selecting "All Experiments".</p>
+          </div>
+        `;
+      }
+
+      return list.map(exp => `
+        <article
+          onclick="navigateToExperiment(${exp.id})"
+          class="group bg-white rounded-2xl border border-slate-200 hover:border-emerald-500/70 p-6 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 cursor-pointer flex flex-col justify-between"
+        >
+          <div>
+            <!-- Top Row: Expt Number & CO Tag -->
+            <div class="flex items-center justify-between gap-2 mb-3.5">
+              <span class="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-900 text-emerald-400">
+                ${exp.code}
+              </span>
+              <div class="flex items-center gap-1.5">
+                ${exp.coMapped.map(co => `<span class="font-mono text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">${co}</span>`).join('')}
+              </div>
+            </div>
+
+            <!-- Category Label -->
+            <div class="text-[11px] font-semibold uppercase tracking-wider text-cyan-700 mb-1">
+              ${exp.category}
+            </div>
+
+            <!-- Experiment Title -->
+            <h3 class="text-base sm:text-lg font-bold text-slate-900 group-hover:text-emerald-700 transition leading-snug mb-2.5">
+              ${exp.title}
+            </h3>
+
+            <!-- Summary -->
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4 line-clamp-3">
+              ${exp.summary}
+            </p>
+          </div>
+
+          <div>
+            <!-- Topic Tags -->
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              ${exp.tags.map(tag => `
+                <span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-emerald-50/80 text-emerald-800 border border-emerald-200/70">
+                  ${tag}
+                </span>
+              `).join('')}
+            </div>
+
+            <!-- Footer Action Bar -->
+            <div class="pt-3.5 border-t border-slate-100 flex items-center justify-between text-xs font-semibold">
+              <span class="text-slate-400 flex items-center gap-1.5">
+                <i class="fa-regular fa-clock"></i> ${exp.duration}
+              </span>
+              <span class="text-emerald-700 group-hover:translate-x-1 transition-transform inline-flex items-center gap-1.5">
+                Open Experiment <i class="fa-solid fa-arrow-right"></i>
+              </span>
+            </div>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function renderExperimentsGrid() {
+      const grid = document.getElementById('experiments-grid');
+      if (grid) {
+        grid.innerHTML = renderExperimentCardsHtml();
+      }
+    }
+
+    // =========================================================================
+    // 9. RENDER EXPERIMENT DETAIL VIEW (DEDICATED PAGE WITH MULTI-CODE BLOCKS)
+    // =========================================================================
+    function renderExperimentDetailView(expId) {
+      const expIndex = EXPERIMENTS.findIndex(e => e.id === expId);
+      const exp = EXPERIMENTS[expIndex] || EXPERIMENTS[0];
+      const prevExp = expIndex > 0 ? EXPERIMENTS[expIndex - 1] : null;
+      const nextExp = expIndex < EXPERIMENTS.length - 1 ? EXPERIMENTS[expIndex + 1] : null;
+
+      return `
+        <div class="fade-in max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
+          <!-- Breadcrumb & Back Navigation Bar -->
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-6 no-print">
+            <nav class="flex items-center gap-2 text-xs sm:text-sm text-slate-500">
+              <button onclick="navigateToHome()" class="hover:text-emerald-700 font-medium flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-house"></i>
+                <span>Lab Index</span>
+              </button>
+              <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+              <span class="font-mono font-semibold text-slate-800">${exp.code}</span>
+            </nav>
+
+            <button onclick="navigateToHome()" class="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 text-xs sm:text-sm font-semibold shadow-sm transition inline-flex items-center gap-2">
+              <i class="fa-solid fa-arrow-left text-emerald-600"></i>
+              <span>Back to Experiments</span>
+            </button>
+          </div>
+
+          <!-- Experiment Header Hero Banner -->
+          <div class="bg-navy-900 circuit-pattern text-white rounded-2xl p-6 sm:p-8 border border-slate-800 shadow-lg mb-8 print-shadow-none">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="font-mono text-xs font-bold px-3 py-1 rounded-lg bg-emerald-500 text-slate-950">
+                  ${exp.code}
+                </span>
+                <span class="text-xs font-semibold px-3 py-1 rounded-lg bg-slate-800 text-cyan-300 border border-slate-700">
+                  ${exp.category}
+                </span>
+                <span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-slate-800/80 text-slate-300 border border-slate-700">
+                  Mapped: ${exp.coMapped.join(', ')}
+                </span>
+              </div>
+              <span class="text-xs text-slate-300 flex items-center gap-1.5">
+                <i class="fa-regular fa-clock text-emerald-400"></i> Duration: ${exp.duration}
+              </span>
+            </div>
+
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-3">
+              ${exp.title}
+            </h1>
+            <p class="text-slate-300 text-sm sm:text-base max-w-3xl leading-relaxed mb-6">
+              ${exp.summary}
+            </p>
+
+            <!-- Action Buttons: Download Lab Manual & Print/Save PDF -->
+            <div class="flex flex-wrap items-center gap-3 pt-4 border-t border-slate-800 no-print">
+              <button
+                onclick="downloadLabManual(${exp.id})"
+                class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-emerald-600/25 transition inline-flex items-center gap-2"
+              >
+                <i class="fa-solid fa-file-arrow-down"></i>
+                <span>Download Lab Manual (.HTML)</span>
+              </button>
+
+              <button
+                onclick="downloadExperimentPdf(${exp.id})"
+                class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs sm:text-sm font-semibold transition inline-flex items-center gap-2"
+              >
+                <i class="fa-solid fa-print text-cyan-400"></i>
+                <span>Print / Save as PDF</span>
+              </button>
+
+              <a
+                href="#video-tutorial-section"
+                class="px-4 py-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs sm:text-sm font-semibold transition inline-flex items-center gap-2"
+              >
+                <i class="fa-brands fa-youtube text-rose-500 text-base"></i>
+                <span>Watch Video Tutorial</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Two-Column Layout for Objective & Tools Required -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Objective Card (2/3 width) -->
+            <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm print-shadow-none">
+              <div class="flex items-center gap-2.5 mb-4">
+                <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <i class="fa-solid fa-bullseye"></i>
+                </div>
+                <h2 class="text-lg font-bold text-slate-900">1. Objective of the Experiment</h2>
+              </div>
+              <ul class="space-y-2.5 text-sm text-slate-700">
+                ${exp.objectives.map(obj => `
+                  <li class="flex items-start gap-2.5">
+                    <i class="fa-solid fa-circle-check text-emerald-600 mt-1 text-xs shrink-0"></i>
+                    <span>${obj}</span>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+
+            <!-- Tools Required Card (1/3 width) -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm print-shadow-none">
+              <div class="flex items-center gap-2.5 mb-4">
+                <div class="w-9 h-9 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center">
+                  <i class="fa-solid fa-screwdriver-wrench"></i>
+                </div>
+                <h2 class="text-lg font-bold text-slate-900">2. Tools Required</h2>
+              </div>
+              <div class="space-y-3">
+                ${exp.tools.map(tool => `
+                  <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-700 flex items-center justify-center shrink-0">
+                      <i class="fa-solid ${tool.icon} text-xs text-emerald-600"></i>
+                    </div>
+                    <div>
+                      <div class="text-xs font-bold text-slate-900">${tool.name}</div>
+                      <div class="text-[11px] text-slate-500">${tool.role}</div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+
+          <!-- Theory, Circuit Diagram & Multiple Reference Code Blocks Section -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm mb-8 print-shadow-none">
+            <div class="flex items-center justify-between gap-2.5 mb-5">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <i class="fa-solid fa-book-open"></i>
+                </div>
+                <h2 class="text-lg sm:text-xl font-bold text-slate-900">3. Theory, Schematic & Reference Code</h2>
+              </div>
+              <span class="font-mono text-xs px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">
+                ${(exp.codeSnippets || []).length} Code File${(exp.codeSnippets || []).length === 1 ? '' : 's'}
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              <!-- Theory Explanation -->
+              <div class="lg:col-span-7 text-sm text-slate-700 leading-relaxed">
+                ${exp.theory}
+              </div>
+
+              <!-- SVG Circuit / Architecture Diagram -->
+              <div class="lg:col-span-5 bg-slate-50 rounded-2xl border border-slate-200 p-4">
+                <div class="text-[11px] font-mono uppercase tracking-wider text-slate-500 mb-2 text-center">
+                  Reference Circuit / Architecture Diagram
+                </div>
+                ${exp.diagramSvg}
+              </div>
+            </div>
+
+            <!-- Multiple Code Snippet Blocks with Individual Copy Buttons -->
+            <div class="mt-6 space-y-4">
+              ${(exp.codeSnippets || []).map((snip, idx) => `
+                <div class="rounded-2xl overflow-hidden border border-slate-800 bg-slate-950">
+                  <div class="px-4 py-2.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 min-w-0">
+                      <span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 shrink-0">
+                        #${idx + 1}
+                      </span>
+                      <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
+                        ${snip.language}
+                      </span>
+                      <span class="font-mono text-xs text-slate-300 truncate">${snip.title}</span>
+                    </div>
+                    <button
+                      onclick="copyCodeSnippet(${exp.id}, ${idx})"
+                      class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition inline-flex items-center gap-1.5 shrink-0 no-print"
+                    >
+                      <i class="fa-regular fa-copy text-emerald-400"></i>
+                      <span>Copy Code</span>
+                    </button>
+                  </div>
+                  <pre class="p-4 text-xs font-mono text-slate-200 overflow-x-auto leading-relaxed"><code>${snip.code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Step-by-Step Procedure Section -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm mb-8 print-shadow-none">
+            <div class="flex items-center gap-2.5 mb-5">
+              <div class="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                <i class="fa-solid fa-list-ol"></i>
+              </div>
+              <h2 class="text-lg sm:text-xl font-bold text-slate-900">4. Laboratory Execution Procedure</h2>
+            </div>
+
+            <ol class="space-y-3">
+              ${exp.procedure.map((step, idx) => `
+                <li class="flex items-start gap-3.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200/70">
+                  <span class="w-7 h-7 rounded-lg bg-slate-900 text-white font-mono text-xs font-bold flex items-center justify-center shrink-0">
+                    ${idx + 1}
+                  </span>
+                  <span class="text-sm text-slate-700 leading-relaxed pt-0.5">${step}</span>
+                </li>
+              `).join('')}
+            </ol>
+          </div>
+
+          <!-- Embedded YouTube Video Tutorial Section -->
+          <div id="video-tutorial-section" class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm mb-8 no-print">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                  <i class="fa-brands fa-youtube text-lg"></i>
+                </div>
+                <div>
+                  <h2 class="text-lg sm:text-xl font-bold text-slate-900">5. Video Lecture & Simulation Walkthrough</h2>
+                  <p class="text-xs text-slate-500">${exp.videoChannel}</p>
+                </div>
+              </div>
+              <a
+                href="https://www.youtube.com/results?search_query=${encodeURIComponent(exp.title + ' VLSI tutorial')}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-xs font-semibold text-rose-600 hover:text-rose-700 inline-flex items-center gap-1.5"
+              >
+                <span>Open More Tutorials on YouTube</span>
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              </a>
+            </div>
+
+            <!-- Responsive 16:9 YouTube Iframe Container -->
+            <div class="relative w-full aspect-video rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-inner">
+              <iframe
+                class="absolute inset-0 w-full h-full"
+                src="https://www.youtube.com/embed/${exp.videoId}?rel=0"
+                title="${exp.videoTitle}"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen
+              ></iframe>
+            </div>
+
+            <div class="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div class="text-xs font-bold text-slate-900">${exp.videoTitle}</div>
+                <p class="text-xs text-slate-600 mt-0.5">${exp.videoNotes}</p>
+              </div>
+              <button
+                onclick="downloadLabManual(${exp.id})"
+                class="shrink-0 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition inline-flex items-center gap-2"
+              >
+                <i class="fa-solid fa-download text-emerald-400"></i>
+                <span>Download Manual</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Previous / Next Experiment Navigation Footer -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-200 no-print">
+            ${prevExp ? `
+              <button
+                onclick="navigateToExperiment(${prevExp.id})"
+                class="p-4 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-emerald-400 text-left transition flex items-center gap-3.5 shadow-sm"
+              >
+                <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-arrow-left"></i>
+                </div>
+                <div class="min-w-0">
+                  <div class="text-[11px] font-mono font-semibold text-slate-400">PREVIOUS • ${prevExp.code}</div>
+                  <div class="text-xs sm:text-sm font-bold text-slate-900 truncate">${prevExp.title}</div>
+                </div>
+              </button>
+            ` : `<div></div>`}
+
+            ${nextExp ? `
+              <button
+                onclick="navigateToExperiment(${nextExp.id})"
+                class="p-4 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-emerald-400 text-right transition flex items-center justify-end gap-3.5 shadow-sm"
+              >
+                <div class="min-w-0">
+                  <div class="text-[11px] font-mono font-semibold text-emerald-600">NEXT • ${nextExp.code}</div>
+                  <div class="text-xs sm:text-sm font-bold text-slate-900 truncate">${nextExp.title}</div>
+                </div>
+                <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-arrow-right"></i>
+                </div>
+              </button>
+            ` : `
+              <button
+                onclick="navigateToHome()"
+                class="p-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-right transition flex items-center justify-end gap-3.5 shadow-sm"
+              >
+                <div>
+                  <div class="text-[11px] font-mono font-semibold text-emerald-200">ALL EXPERIMENTS COMPLETED</div>
+                  <div class="text-xs sm:text-sm font-bold">Return to Lab Index</div>
+                </div>
+                <div class="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-house"></i>
+                </div>
+              </button>
+            `}
+          </div>
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // 10. MAIN APPLICATION RENDER CONTROLLER
+    // =========================================================================
+    function renderApp() {
+      const root = document.getElementById('app-root');
+      if (currentView.page === 'detail') {
+        root.innerHTML = renderExperimentDetailView(currentView.expId);
+      } else {
+        root.innerHTML = renderHomeView();
+      }
+    }
+
+    // Initialize Application on Load
+    window.addEventListener('DOMContentLoaded', () => {
+      syncHeaderAndFooter();
+      renderApp();
+    });
+  </script>
+</body>
+</html>
