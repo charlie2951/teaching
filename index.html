@@ -137,7 +137,7 @@
         <span><strong class="text-slate-200" id="footer-lab-name">VLSI Design Laboratory (EC-39006)</strong> — <span id="footer-univ-name">Kalinga Institute of Industrial Technology</span></span>
       </div>
       <div class="text-slate-500">
-        Designed for Undergraduate VLSI Design Laboratory Curriculum
+        Designed for Undergraduate & Postgraduate Microelectronics Curriculum
       </div>
     </div>
   </footer>
@@ -297,8 +297,8 @@ endmodule`
         domain: "VERILOG",
         duration: "2 Hours",
         coMapped: ["CO4", "CO6"],
-        tags: ["Verilog", "Synthesis", "FPGA", "Ripple Carry Adder"],
-        summary: "Synthesis, simulation and FPGA implementation of 4-bit ripple carry adder using dataflow and structural modeling.",
+        tags: ["Verilog", "Synthesis", "FPGA", "Counter"],
+        summary: "Synthesis, simulation and FPGA implementation of synchronous and asynchronous counter.",
         objectives: [
           "To design and test a Flip flop in Verilog using dataflow modeling.",
           "To design and test synchronous and asynchronous counter.",
@@ -519,25 +519,104 @@ endmodule`
         videoNotes: "Covers Behavioral modeling of JK flip flop, binary counter and testbench verification."
       },
       {
+        id: 3,
+        code: "EXP-03",
+        title: " IP Core-Based Design and Implementation of a 4-bit Multiplier on FPGA using block design concept.",
+        category: "Verilog/FPGA/Vivado",
+        domain: "Verilog, FPGA",
+        duration: "2 Hours",
+        pdfFile: "manuals/EXP-03.pdf",
+        coMapped: ["CO4"],
+        tags: ["IP core","Vivado IP","FPGA","Multiplier"],
+        summary: "Utilizing IP core of Vivado for project. Sample demo using Multiplier IP and its FPGA implementation.",
+        objectives: [
+          "To be familiar with the Vivado IP core and how to use it",
+          "To be familiar with block design in Vivado." ],
+        tools: [
+          { name: "Vivado", role: "Synthesis, Simulation and FPGA implementation", icon: "fa-wave-square" }
+          
+        ],
+        theory: `
+          <p class="mb-3">The Xilinx Vivado Multiplier IP (LogiCORE IP Multiplier) is a customizable,
+            pre-verified hardware block designed to perform high-speed binary multiplication 
+            on AMD/Xilinx FPGAs and adaptive SoCs. Accessible through the Vivado IP Catalog, 
+            it supports both signed and unsigned integer operations across configurable 
+            input bit widths ranging from 1 to 64 bits.Developers can optimize the core 
+            based on specific design constraints by selecting between two primary 
+            implementation architectures: LUT-based (utilizing general fabric logic) 
+            or DSP48 slice-based (leveraging dedicated hardware multipliers for superior 
+            speed and power efficiency). The IP also allows users to customize pipeline 
+            stages to maximize clock frequency, choose between parallel or 
+            constant-coefficient multiplication to save resources, and 
+            add optional control signals like Clock Enable (CE) and Synchronous Clear (SCLR).
+             By abstracting low-level hardware mapping and timing closure complexities, 
+             the Vivado Multiplier IP accelerates the development of digital signal processing (DSP), 
+             image processing, and arithmetic-intensive FPGA pipelines.</p>
+             `,
+        diagramSvg: `
+          <img src="img/mult.png" alt="A 4-bit Multiplier using Vivado IP core.">
+        `,
+        codeSnippets: [
+          {
+            title: "Testbench",
+            language: "Verilog",
+            code: `//Testbench code for testing multiplier IP
+module test_mult();
+    
+    reg [3:0] A,B;
+    wire [7:0] P;
+    reg clk;
+    integer i;
+    design_1_wrapper uut(A,B,P,clk);
+    initial begin
+    clk=0;
+    for(i=0;i<16;i=i+1) begin
+    A=$random;
+    B=$random;
+    #20;
+    $display("A=%d, B=%d, Result=%d",A,B,P);
+    end
+     $finish;
+    end
+   always #10 clk=~clk;
+endmodule`
+  }
+   ],
+        procedure: [
+          "Launch the Vivado, Create a new project and setup the hardware. Do not include design code.",
+          "Create a block design project, Open Vivado IP library as instructed in PDF manual",
+          "Search and include multiplier in your design",
+          "Configure input and output bit width",
+          "Perform synthesis and testbench verification",
+          "Implement the design into FPGA"
+        ],
+        videoId: "n6h3D4cRBqo",
+        videoTitle: "Block design in Vivado with example:Multiplier IP",
+        videoChannel: "All About Electronics • VLSI & Digital Microelectronics",
+        videoNotes: "Covers IP core based design on Vivado"
+      },
+      {
         id: 4,
         code: "EXP-04",
-        title: "DC & Transient Characteristics of a Static CMOS Inverter",
-        category: "Analog / Full-Custom SPICE",
+        title: "DC Characteristics of a Static CMOS Inverter",
+        category: "Analog / Full-Custom SPICE, Cadence Virtuoso",
         domain: "SPICE",
-        duration: "3 Hours",
-        coMapped: ["CO1"],
-        tags: ["CMOS Inverter", "VTC Curve", "Noise Margin", "Propagation Delay"],
-        summary: "Simulate Voltage Transfer Characteristics (VTC), switching threshold (Vm), noise margins (NMH, NML), and rise/fall propagation delays (tpLH, tpHL) of a static CMOS inverter.",
+        pdfFile: "manuals/EXP-04.pdf",
+        duration: "2 Hours",
+        coMapped: ["CO5"],
+        tags: ["CMOS Inverter", "VTC Curve", "Noise Margin"],
+        summary: "Simulate Voltage Transfer Characteristics (VTC), switching threshold (Vm), noise margins (NMH, NML) of a static CMOS inverter.",
         objectives: [
-          "To design a schematic of a static CMOS inverter using 180nm / 45nm technology models.",
+          "To be familiar about Cadenec Virtuoso Platform",
+          "To Simulate NMOS and PMOS characteristics in Virtuoso",
+          "To design a schematic of a static CMOS inverter using 180nm technology models (GPDK180).",
           "To plot the Voltage Transfer Characteristic (VTC) and determine the switching threshold voltage (Vm).",
           "To compute Noise Margin High (NMH) and Noise Margin Low (NML) from unity-gain points (VIH, VIL).",
-          "To perform transient analysis and measure propagation delays (tpHL, tpLH) and dynamic power dissipation."
+          "To study the variation in VTC curve with Wp/Wn."
         ],
         tools: [
           { name: "Cadence Virtuoso", role: "Schematic & Spectre Simulation", icon: "fa-wave-square" },
-          { name: "LTspice XVII", role: "SPICE Netlist Simulation", icon: "fa-bolt" },
-          { name: "GPDK 180nm / 45nm", role: "BSIM4 Device Model Library", icon: "fa-microchip" }
+          { name: "GPDK 180nm ", role: "BSIM4 Device Model Library", icon: "fa-microchip" }
         ],
         theory: `
           <p class="mb-3">A static <strong>CMOS Inverter</strong> consists of a pull-up <strong>PMOS</strong> transistor connected to <code>V<sub>DD</sub></code> and a pull-down <strong>NMOS</strong> transistor connected to <code>GND</code>, with their gates tied together as input <code>V<sub>in</sub></code> and drains tied together as output <code>V<sub>out</sub></code>.</p>
@@ -602,67 +681,125 @@ endmodule`
             <text x="303" y="153" font-family="JetBrains Mono" font-size="10" fill="#64748b">CL (50fF)</text>
           </svg>
         `,
-        codeSnippets: [
-          {
-            title: "CMOS Inverter DC & Transient Netlist (cmos_inv.sp)",
-            language: "SPICE",
-            code: `* Static CMOS Inverter DC & Transient Simulation
-.include 'tsmc180nm.lib'
-
-VDD vdd 0 DC 1.8V
-VIN in 0 PULSE(0 1.8 1n 50p 50p 5n 10n)
-
-* PMOS: Drain Gate Source Bulk Model W L
-MP1 out in vdd vdd CMOSP W=1.0u L=0.18u
-* NMOS: Drain Gate Source Bulk Model W L
-MN1 out in 0   0   CMOSN W=0.4u L=0.18u
-
-CL out 0 50fF
-
-* Analyses
-.DC VIN 0 1.8 0.01
-.TRAN 10p 25n
-
-* Measurements
-.MEASURE TRAN tpHL TRIG V(in) VAL=0.9 RISE=1 TARG V(out) VAL=0.9 FALL=1
-.MEASURE TRAN tpLH TRIG V(in) VAL=0.9 FALL=1 TARG V(out) VAL=0.9 RISE=1
-.END`
-          },
-          {
-            title: "Parametric Width Sweep Script (wp_sweep.sp)",
-            language: "SPICE",
-            code: `* Parametric Sweep of PMOS Width (Wp) for Vm Optimization
-.PARAM Wp_val = 0.8u
-.STEP PARAM Wp_val 0.4u 1.6u 0.4u
-
-MP1 out in vdd vdd CMOSP W={Wp_val} L=0.18u
-MN1 out in 0   0   CMOSN W=0.4u    L=0.18u
-
-.DC VIN 0 1.8 0.005
-.MEASURE DC Vm WHEN V(out)=V(in)
-.END`
-          }
-        ],
+        
         procedure: [
-          "Launch the EDA schematic editor (Cadence Virtuoso / LTspice) and create a new library named <code>VLSI_Lab</code>.",
+          "Launch the EDA schematic editor (Cadence Virtuoso) and create a new library named <code>VLSI_Lab</code>.",
           "Instantiate one NMOS (W = 400nm, L = 180nm) and one PMOS (W = 1000nm, L = 180nm) transistor.",
           "Connect the gates together to input source <code>VIN</code>, drains to output node <code>VOUT</code>, PMOS source/bulk to <code>VDD (1.8V)</code>, and NMOS source/bulk to <code>GND</code>.",
           "Attach a load capacitor <code>CL = 50 fF</code> at the output node.",
           "Run a <strong>DC Sweep</strong> of <code>VIN</code> from 0V to 1.8V in steps of 10mV. Plot <code>VOUT</code> vs <code>VIN</code> and derivative <code>d(VOUT)/d(VIN)</code> to locate <code>VIL</code> and <code>VIH</code>.",
-          "Configure <code>VIN</code> as a pulse waveform (tr = tf = 50ps, period = 10ns) and run a <strong>Transient Analysis</strong> for 25ns to measure <code>tpHL</code> and <code>tpLH</code>."
+          "Run a parametric analysis and vary input DC voltage for different PMOS width to observe the VTC variation with Wp/Wn"
         ],
-        videoId: "f1lB957f5dY",
+        videoId: "J2M7MSwbZV0",
         videoTitle: "CMOS Inverter Working, VTC Curve & Noise Margin Explained",
         videoChannel: "All About Electronics • VLSI & Digital Microelectronics",
         videoNotes: "Covers pull-up/pull-down regions of operation, derivation of switching threshold Vm, and graphical determination of Noise Margins."
       },
       {
-        id: 3,
-        code: "EXP-03",
+        id: 5,
+        code: "EXP-05",
+        title: "Transient Analysis of a Static CMOS Inverter and calculation of propagation delay.",
+        category: "Analog / Full-Custom SPICE, Cadence Virtuoso",
+        domain: "SPICE",
+        pdfFile: "manuals/EXP-05.pdf",
+        duration: "2 Hours",
+        coMapped: ["CO5"],
+        tags: ["CMOS Inverter", "Transient analysis", "propagation delay"],
+        summary: "Simulate transient Characteristics of a static CMOS inverter and calculate delay times.",
+        objectives: [
+          "To design a schematic of a CMOS inverter using 180nm technology models (GPDK180).",
+          "To run the transient analysis.",
+          "To compute proparation delay, rise and fall time from waveform"
+          
+        ],
+        tools: [
+          { name: "Cadence Virtuoso", role: "Schematic & Spectre Simulation", icon: "fa-wave-square" },
+          { name: "GPDK 180nm ", role: "BSIM4 Device Model Library", icon: "fa-microchip" }
+        ],
+        theory: `
+          <p class="mb-3">A static <strong>CMOS Inverter</strong> consists of a pull-up <strong>PMOS</strong> transistor connected to <code>V<sub>DD</sub></code> and a pull-down <strong>NMOS</strong> transistor connected to <code>GND</code>, with their gates tied together as input <code>V<sub>in</sub></code> and drains tied together as output <code>V<sub>out</sub></code>.</p>
+          <p class="mb-3">When <code>V<sub>in</sub> = 0 V</code>, the NMOS is in cutoff while the PMOS operates in the linear region, pulling <code>V<sub>out</sub></code> to <code>V<sub>DD</sub></code>. Conversely, when <code>V<sub>in</sub> = V<sub>DD</sub></code>, the NMOS turns ON and discharges the load capacitance <code>C<sub>L</sub></code> to <code>0 V</code>. Because one transistor is always OFF in steady state, static power dissipation is negligible.</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 my-4">
+            <div class="bg-slate-900 text-emerald-300 p-3.5 rounded-xl font-mono text-xs border border-slate-700">
+              <div class="text-slate-400 text-[11px] uppercase mb-1">Switching Threshold (V<sub>m</sub>)</div>
+              V<sub>m</sub> = (V<sub>DD</sub> - |V<sub>tp</sub>| + V<sub>tn</sub>&radic;(k<sub>n</sub>/k<sub>p</sub>)) / (1 + &radic;(k<sub>n</sub>/k<sub>p</sub>))
+            </div>
+            <div class="bg-slate-900 text-cyan-300 p-3.5 rounded-xl font-mono text-xs border border-slate-700">
+              <div class="text-slate-400 text-[11px] uppercase mb-1">Noise Margins & Propagation Delay</div>
+              NM<sub>H</sub> = V<sub>OH</sub> - V<sub>IH</sub> &nbsp;|&nbsp; NM<sub>L</sub> = V<sub>IL</sub> - V<sub>OL</sub><br/>
+              t<sub>p</sub> = (t<sub>pHL</sub> + t<sub>pLH</sub>) / 2
+            </div>
+          </div>
+          `,
+        diagramSvg: `
+          <svg viewBox="0 0 420 230" class="w-full max-w-md mx-auto bg-white rounded-xl border border-slate-200 p-3">
+            <!-- VDD Rail -->
+            <line x1="160" y1="25" x2="260" y2="25" stroke="#0f172a" stroke-width="2.5"/>
+            <text x="210" y="17" text-anchor="middle" font-family="JetBrains Mono" font-size="12" font-weight="bold" fill="#059669">VDD (1.8V)</text>
+            <!-- PMOS -->
+            <line x1="210" y1="25" x2="210" y2="50" stroke="#0f172a" stroke-width="2"/>
+            <line x1="210" y1="50" x2="185" y2="50" stroke="#0f172a" stroke-width="2"/>
+            <line x1="185" y1="45" x2="185" y2="85" stroke="#0f172a" stroke-width="2"/>
+            <line x1="185" y1="80" x2="210" y2="80" stroke="#0f172a" stroke-width="2"/>
+            <line x1="176" y1="48" x2="176" y2="82" stroke="#0f172a" stroke-width="2"/>
+            <circle cx="170" cy="65" r="4.5" fill="none" stroke="#0284c7" stroke-width="2"/>
+            <text x="225" y="69" font-family="Inter" font-size="11" font-weight="600" fill="#0284c7">PMOS (Wp/Lp)</text>
+            <!-- Drain connection -->
+            <line x1="210" y1="80" x2="210" y2="145" stroke="#0f172a" stroke-width="2"/>
+            <!-- NMOS -->
+            <line x1="210" y1="145" x2="185" y2="145" stroke="#0f172a" stroke-width="2"/>
+            <line x1="185" y1="140" x2="185" y2="180" stroke="#0f172a" stroke-width="2"/>
+            <line x1="185" y1="175" x2="210" y2="175" stroke="#0f172a" stroke-width="2"/>
+            <line x1="176" y1="143" x2="176" y2="177" stroke="#0f172a" stroke-width="2"/>
+            <text x="225" y="165" font-family="Inter" font-size="11" font-weight="600" fill="#059669">NMOS (Wn/Ln)</text>
+            <!-- GND -->
+            <line x1="210" y1="175" x2="210" y2="198" stroke="#0f172a" stroke-width="2"/>
+            <line x1="194" y1="198" x2="226" y2="198" stroke="#0f172a" stroke-width="2.5"/>
+            <line x1="200" y1="204" x2="220" y2="204" stroke="#0f172a" stroke-width="2"/>
+            <line x1="206" y1="210" x2="214" y2="210" stroke="#0f172a" stroke-width="1.5"/>
+            <!-- Gates Tied Together (Vin) -->
+            <line x1="165" y1="65" x2="140" y2="65" stroke="#0f172a" stroke-width="2"/>
+            <line x1="176" y1="160" x2="140" y2="160" stroke="#0f172a" stroke-width="2"/>
+            <line x1="140" y1="65" x2="140" y2="160" stroke="#0f172a" stroke-width="2"/>
+            <line x1="140" y1="112" x2="90" y2="112" stroke="#0f172a" stroke-width="2"/>
+            <circle cx="86" cy="112" r="4" fill="#0f172a"/>
+            <text x="55" y="116" font-family="JetBrains Mono" font-size="12" font-weight="bold" fill="#0f172a">Vin</text>
+            <!-- Output Node (Vout) + Cload -->
+            <circle cx="210" cy="112" r="4" fill="#e11d48"/>
+            <line x1="210" y1="112" x2="320" y2="112" stroke="#0f172a" stroke-width="2"/>
+            <circle cx="324" cy="112" r="4" fill="#e11d48"/>
+            <text x="335" y="116" font-family="JetBrains Mono" font-size="12" font-weight="bold" fill="#e11d48">Vout</text>
+            <!-- Load Cap -->
+            <line x1="285" y1="112" x2="285" y2="145" stroke="#64748b" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <line x1="273" y1="145" x2="297" y2="145" stroke="#64748b" stroke-width="2"/>
+            <line x1="273" y1="152" x2="297" y2="152" stroke="#64748b" stroke-width="2"/>
+            <line x1="285" y1="152" x2="285" y2="175" stroke="#64748b" stroke-width="1.5"/>
+            <line x1="277" y1="175" x2="293" y2="175" stroke="#64748b" stroke-width="2"/>
+            <text x="303" y="153" font-family="JetBrains Mono" font-size="10" fill="#64748b">CL (50fF)</text>
+          </svg>
+        `,
+        
+        procedure: [
+          "Launch the EDA schematic editor (Cadence Virtuoso) and create a new library named <code>VLSI_Lab</code>.",
+          "Instantiate one NMOS (W = 400nm, L = 180nm) and one PMOS (W = 1000nm, L = 180nm) transistor.",
+          "Connect the gates together to input source <code>VIN</code>, drains to output node <code>VOUT</code>, PMOS source/bulk to <code>VDD (1.8V)</code>, and NMOS source/bulk to <code>GND</code>.",
+          "Attach a load capacitor <code>CL = 50 fF</code> at the output node.",
+          "Apply a pulse at the input and run transient analysis",
+          "Calculate rise, fall time and propagation delay from waveform using calculator"
+        ],
+        videoId: "lYK6b92T09k",
+        videoTitle: "CMOS Inverter Working, VTC Curve & Noise Margin Explained",
+        videoChannel: "All About Electronics • VLSI & Digital Microelectronics",
+        videoNotes: "Covers pull-up/pull-down regions of operation, derivation of switching threshold Vm, and graphical determination of Noise Margins."
+      },
+      {
+        id: 6,
+        code: "EXP-06",
         title: "Design & Sizing of 2-Input CMOS NAND and NOR Logic Gates",
         category: "Static CMOS Combinational Logic",
         domain: "SPICE",
-        duration: "3 Hours",
+        duration: "2 Hours",
+        pdfFile: "manuals/EXP-05.pdf",
         coMapped: ["CO1", "CO2"],
         tags: ["2-Input NAND", "2-Input NOR", "Logical Effort", "Transistor Sizing"],
         summary: "Construct static 2-input CMOS NAND and NOR gates, size series/parallel transistors for worst-case delay matching, and verify functional truth tables.",
@@ -674,7 +811,6 @@ MN1 out in 0   0   CMOSN W=0.4u    L=0.18u
         ],
         tools: [
           { name: "Cadence Virtuoso", role: "Schematic Capture & ADE L", icon: "fa-wave-square" },
-          { name: "LTspice XVII", role: "Transient Waveform Verification", icon: "fa-bolt" },
           { name: "GPDK 180nm", role: "Standard Cell Model Library", icon: "fa-microchip" }
         ],
         theory: `
@@ -740,52 +876,7 @@ MN1 out in 0   0   CMOSN W=0.4u    L=0.18u
             <line x1="220" y1="214" x2="240" y2="214" stroke="#0f172a" stroke-width="2"/>
           </svg>
         `,
-        codeSnippets: [
-          {
-            title: "2-Input CMOS NAND2 SPICE Netlist (nand2_cmos.sp)",
-            language: "SPICE",
-            code: `* 2-Input Static CMOS NAND Gate (Sized for Symmetric Delay)
-.include 'tsmc180nm.lib'
-
-VDD vdd 0 DC 1.8V
-VA  a   0 PULSE(0 1.8 0n 50p 50p 10n 20n)
-VB  b   0 PULSE(0 1.8 0n 50p 50p 20n 40n)
-
-* Parallel Pull-Up PMOS Network (Unit Width Wp = 1.0u)
-MPA out a vdd vdd CMOSP W=1.0u L=0.18u
-MPB out b vdd vdd CMOSP W=1.0u L=0.18u
-
-* Series Pull-Down NMOS Network (2x Width Wn = 0.8u)
-MNA out  a n1 0 CMOSN W=0.8u L=0.18u
-MNB n1   b 0  0 CMOSN W=0.8u L=0.18u
-
-CL out 0 50fF
-.TRAN 10p 45n
-.END`
-          },
-          {
-            title: "2-Input CMOS NOR2 SPICE Netlist (nor2_cmos.sp)",
-            language: "SPICE",
-            code: `* 2-Input Static CMOS NOR Gate (Sized for Symmetric Delay)
-.include 'tsmc180nm.lib'
-
-VDD vdd 0 DC 1.8V
-VA  a   0 PULSE(0 1.8 0n 50p 50p 10n 20n)
-VB  b   0 PULSE(0 1.8 0n 50p 50p 20n 40n)
-
-* Series Pull-Up PMOS Network (2x Width Wp = 2.0u)
-MPA n1  a vdd vdd CMOSP W=2.0u L=0.18u
-MPB out b n1  vdd CMOSP W=2.0u L=0.18u
-
-* Parallel Pull-Down NMOS Network (Unit Width Wn = 0.4u)
-MNA out a 0 0 CMOSN W=0.4u L=0.18u
-MNB out b 0 0 CMOSN W=0.4u L=0.18u
-
-CL out 0 50fF
-.TRAN 10p 45n
-.END`
-          }
-        ],
+        
         procedure: [
           "Create two separate schematic cells named <code>NAND2_CMOS</code> and <code>NOR2_CMOS</code> in the library.",
           "For <code>NAND2_CMOS</code>, wire two PMOS devices in parallel between <code>VDD</code> and <code>OUT</code>, and two NMOS devices (width = 2&times;Wn) in series between <code>OUT</code> and <code>GND</code>.",
