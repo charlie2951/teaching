@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sentaurus TCAD Script Builder (SDE, SDEVICE & AC)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    input[type="number"]::-webkit-inner-spin-button { opacity: 0.5; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-200 font-sans antialiased min-h-screen flex flex-col">
+
+  <!-- Top Navigation Header -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-20 px-5 py-3 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-lg bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400 font-bold font-mono text-sm">
+        TCAD
+      </div>
+      <div>
+        <h1 class="text-base font-semibold text-white tracking-tight">Sentaurus TCAD Script Builder</h1>
+        <p class="text-xs text-slate-400">SDE Geometry, SDEVICE DC &amp; AC Small-Signal Generator</p>
+      </div>
+    </div>
+
+    <!-- Technology Presets -->
+    <div class="flex items-center gap-2 flex-wrap">
+      <span class="text-xs text-slate-400 mr-1">Presets:</span>
+      <button onclick="applyPreset('bulk')" class="px-2.5 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition">65nm Bulk NMOS</button>
+      <button onclick="applyPreset('soi')" class="px-2.5 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition">22nm FDSOI</button>
+      <button onclick="applyPreset('finfet')" class="px-2.5 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition">7nm FinFET</button>
+      <button onclick="applyPreset('nanosheet')" class="px-2.5 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition">3nm Nanosheet</button>
+      <button onclick="applyPreset('gaafet')" class="px-2.5 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition">2nm GAAFET</button>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-0">
+
+    <!-- LEFT COLUMN: Parameter Controls -->
+    <aside class="lg:col-span-5 xl:col-span-4 border-r border-slate-800 bg-slate-900/40 p-5 overflow-y-auto lg:h-[calc(100vh-61px)] space-y-6">
+
+      <!-- 1. Architecture & Polarity -->
+      <section class="space-y-3">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-400">1. Device Architecture</h2>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Geometry</label>
+            <select id="arch" onchange="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded-md px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+              <option value="bulk">Bulk MOSFET (2D)</option>
+              <option value="soi">SOI MOSFET (2D)</option>
+              <option value="dg">Double-Gate (2D)</option>
+              <option value="finfet" selected>FinFET (3D)</option>
+              <option value="nanosheet">Nanosheet FET (3D)</option>
+              <option value="gaafet">Cylindrical GAAFET (3D)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Channel Type</label>
+            <select id="polarity" onchange="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded-md px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+              <option value="nmos" selected>nMOS (Electron)</option>
+              <option value="pmos">pMOS (Hole)</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Geometry Dimensions -->
+      <section class="space-y-3 border-t border-slate-800/80 pt-4">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-400">2. Dimensions (nm)</h2>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Gate Length (Lg)</label>
+            <input type="number" id="lg" value="16" min="3" max="1000" step="1" oninput="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Underlap / Spacer (Lun)</label>
+            <input type="number" id="lun" value="4" min="0" max="100" step="0.5" oninput="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Source/Drain Length (Lsd)</label>
+            <input type="number" id="lsd" value="18" min="5" max="500" step="1" oninput="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">EOT / Oxide (tox)</label>
+            <input type="number" id="tox" value="0.9" min="0.4" max="20" step="0.1" oninput="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Gate Metal Height (Hgate)</label>
+            <input type="number" id="hgate" value="25" min="5" max="200" step="1" oninput="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Oxide Material</label>
+            <select id="oxMat" onchange="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white">
+              <option value="HfO2" selected>HfO2 (High-k)</option>
+              <option value="SiO2">SiO2 (Silicon Dioxide)</option>
+              <option value="Si3N4">Si3N4</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="archSpecificControls" class="grid grid-cols-2 gap-3 pt-1"></div>
+      </section>
+
+      <!-- 3. Doping & Mesh -->
+      <section class="space-y-3 border-t border-slate-800/80 pt-4">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-400">3. Doping &amp; Mesh (SDE)</h2>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Channel Doping (cm⁻³)</label>
+            <input type="text" id="nch" value="1e16" oninput="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm font-mono text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">S/D Peak Doping (cm⁻³)</label>
+            <input type="text" id="nsd" value="1e20" oninput="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm font-mono text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Extension / LDD (cm⁻³)</label>
+            <input type="text" id="next" value="2e19" oninput="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm font-mono text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">S/D Lateral Straggle (nm)</label>
+            <input type="number" id="straggle" value="2.5" min="0.2" max="50" step="0.1" oninput="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Channel Mesh Min (nm)</label>
+            <input type="number" id="meshCh" value="0.5" min="0.1" max="10" step="0.1" oninput="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Global Mesh Max (nm)</label>
+            <input type="number" id="meshGlobal" value="5.0" min="0.5" max="100" step="0.5" oninput="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. SDEVICE DC Bias & Quantum -->
+      <section class="space-y-3 border-t border-slate-800/80 pt-4">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-400">4. SDEVICE DC Bias &amp; Quantum</h2>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Gate Workfunction (eV)</label>
+            <input type="number" id="wf" value="4.55" min="3.8" max="5.4" step="0.01" oninput="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">DC Sweep Type</label>
+            <select id="sweepType" onchange="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white">
+              <option value="idvg" selected>Id - Vg (Transfer)</option>
+              <option value="idvd">Id - Vd (Output)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Supply Voltage Vdd (V)</label>
+            <input type="number" id="vdd" value="0.7" min="0.1" max="5.0" step="0.05" oninput="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Vds Linear Bias (V)</label>
+            <input type="number" id="vlin" value="0.05" min="0.01" max="1.0" step="0.01" oninput="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>
+        </div>
+
+        <label class="flex items-center gap-2 bg-slate-900/80 border border-slate-800 px-2.5 py-1.5 rounded cursor-pointer text-xs">
+          <input type="checkbox" id="modQuantum" checked onchange="updateUI()" class="accent-indigo-500" />
+          <span>Density Gradient Quantum Model (e/hQuantumPotential)</span>
+        </label>
+      </section>
+
+      <!-- 5. SDEVICE Mobility Models -->
+      <section class="space-y-3 border-t border-slate-800/80 pt-4">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-400">5. SDEVICE Mobility Models</h2>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <label class="flex items-center gap-2 bg-slate-900/80 border border-slate-800 px-2.5 py-1.5 rounded cursor-pointer">
+            <input type="checkbox" id="mobPhumob" checked onchange="updateUI()" class="accent-indigo-500" />
+            <span>PhuMob</span>
+          </label>
+          <label class="flex items-center gap-2 bg-slate-900/80 border border-slate-800 px-2.5 py-1.5 rounded cursor-pointer">
+            <input type="checkbox" id="mobDopingDep" onchange="updateUI()" class="accent-indigo-500" />
+            <span>DopingDependence</span>
+          </label>
+          <label class="flex items-center gap-2 bg-slate-900/80 border border-slate-800 px-2.5 py-1.5 rounded cursor-pointer">
+            <input type="checkbox" id="mobHighField" checked onchange="updateUI()" class="accent-indigo-500" />
+            <span>HighFieldSaturation</span>
+          </label>
+          <label class="flex items-center gap-2 bg-slate-900/80 border border-slate-800 px-2.5 py-1.5 rounded cursor-pointer">
+            <input type="checkbox" id="mobEnormal" checked onchange="updateUI()" class="accent-indigo-500" />
+            <span>Enormal (Surface)</span>
+          </label>
+        </div>
+
+        <div id="enormalModelWrapper">
+          <label class="block text-xs text-slate-400 mb-1">Enormal Surface Scattering Model</label>
+          <select id="enormalModel" onchange="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white">
+            <option value="Lombardi" selected>Enormal( Lombardi )</option>
+            <option value="IALMob">Enormal( IALMob )</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- 6. SDEVICE Recombination Models -->
+      <section class="space-y-3 border-t border-slate-800/80 pt-4">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-400">6. SDEVICE Recombination</h2>
+        <div class="grid grid-cols-3 gap-2 text-xs">
+          <label class="flex items-center gap-2 bg-slate-900/80 border border-slate-800 px-2.5 py-1.5 rounded cursor-pointer">
+            <input type="checkbox" id="recSrh" checked onchange="updateUI()" class="accent-indigo-500" />
+            <span>SRH</span>
+          </label>
+          <label class="flex items-center gap-2 bg-slate-900/80 border border-slate-800 px-2.5 py-1.5 rounded cursor-pointer">
+            <input type="checkbox" id="recBtbt" checked onchange="updateUI()" class="accent-indigo-500" />
+            <span>Band2Band</span>
+          </label>
+          <label class="flex items-center gap-2 bg-slate-900/80 border border-slate-800 px-2.5 py-1.5 rounded cursor-pointer">
+            <input type="checkbox" id="recAuger" checked onchange="updateUI()" class="accent-indigo-500" />
+            <span>Auger</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- 7. SDEVICE Interface Traps -->
+      <section class="space-y-3 border-t border-slate-800/80 pt-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-indigo-400">7. Interface Traps (Dit)</h2>
+          <label class="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
+            <input type="checkbox" id="enableTraps" onchange="updateUI()" class="accent-indigo-500" />
+            <span>Enable Traps</span>
+          </label>
+        </div>
+
+        <div id="trapControls" class="grid grid-cols-2 gap-3 opacity-50 pointer-events-none transition-opacity">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Trap Type</label>
+            <select id="trapType" onchange="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white">
+              <option value="Acceptor" selected>Acceptor</option>
+              <option value="Donor">Donor</option>
+              <option value="FixedCharge">FixedCharge</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Trap Density (cm⁻²)</label>
+            <input type="text" id="trapConc" value="1e12" oninput="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm font-mono text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Interface Location</label>
+            <select id="trapLocation" onchange="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white">
+              <option value="oxide_channel" selected>Oxide / Channel Interface</option>
+              <option value="box_channel">BOX / Channel (SOI)</option>
+              <option value="spacer_channel">Spacer / Underlap Interface</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Energy Mid E0 (eV)</label>
+            <input type="number" id="trapEnergy" value="0.0" min="-0.6" max="0.6" step="0.05" oninput="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. AC Small-Signal Analysis Parameters -->
+      <section class="space-y-3 border-t border-slate-800/80 pt-4 pb-4">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-cyan-400">8. AC Small-Signal Analysis</h2>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">AC Analysis Mode</label>
+            <select id="acMode" onchange="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white">
+              <option value="cv" selected>C-V Sweep (Vgs Ramp)</option>
+              <option value="freq">Frequency Sweep (Y / C-f)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">AC Excitation Node</label>
+            <select id="acNode" onchange="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white">
+              <option value="gate" selected>Gate (Cgg, Cgs, Cgd, Ydg)</option>
+              <option value="drain">Drain (Cdd, Ydd, Ygd)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Start Frequency (Hz)</label>
+            <input type="text" id="fStart" value="1e6" oninput="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm font-mono text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Stop Frequency (Hz)</label>
+            <input type="text" id="fStop" value="1e11" oninput="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm font-mono text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Freq Points (Log)</label>
+            <input type="number" id="fPoints" value="25" min="2" max="200" oninput="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">AC Drain Bias Vds (V)</label>
+            <input type="number" id="acVds" value="0.0" min="0.0" max="5.0" step="0.05" oninput="updateUI()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <!-- RIGHT COLUMN: Live Schematic + Triple Tab Code Viewer -->
+    <section class="lg:col-span-7 xl:col-span-8 flex flex-col lg:h-[calc(100vh-61px)]">
+
+      <!-- Live Cross-Section Preview -->
+      <div class="border-b border-slate-800 bg-slate-900/30 p-4">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Live Longitudinal Cross-Section Schematic</span>
+          <span id="dimSummary" class="text-xs font-mono text-indigo-400"></span>
+        </div>
+        <div class="w-full h-44 bg-slate-950 border border-slate-800/90 rounded-lg flex items-center justify-center overflow-hidden">
+          <svg id="schematicSvg" viewBox="0 0 640 190" class="w-full h-full max-w-2xl"></svg>
+        </div>
+      </div>
+
+      <!-- Triple Tabs & Download Toolbar -->
+      <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 bg-slate-900 border-b border-slate-800">
+        <div class="flex flex-wrap items-center gap-2">
+          <button id="tabSdeBtn" onclick="switchTab('sde')" class="px-3 py-1.5 rounded-md text-xs font-semibold transition bg-indigo-600 text-white shadow">
+            1. SDE (<span class="font-mono">sde_dvs.cmd</span>)
+          </button>
+          <button id="tabSdevBtn" onclick="switchTab('sdevice')" class="px-3 py-1.5 rounded-md text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">
+            2. SDEVICE DC (<span class="font-mono">sdevice_des.cmd</span>)
+          </button>
+          <button id="tabAcBtn" onclick="switchTab('ac')" class="px-3 py-1.5 rounded-md text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700">
+            3. AC Small-Signal (<span class="font-mono">sdevice_ac.cmd</span>)
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="copyBtn" onclick="copyCode()" class="px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition">
+            Copy Script
+          </button>
+          <button onclick="downloadCmd()" class="px-3.5 py-1.5 rounded-md text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow transition flex items-center gap-1.5">
+            <span>⬇ Download .cmd</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Script Output Area -->
+      <div class="flex-1 overflow-auto bg-[#0b1120] p-4 font-mono text-xs leading-relaxed">
+        <pre id="codeDisplay" class="text-slate-200 whitespace-pre"></pre>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    let activeTab = 'sde';
+
+    const extraState = {
+      subH: 60,
+      tsi: 7,
+      tbox: 25,
+      hfin: 35,
+      wfin: 7,
+      nsheets: 3,
+      tsheet: 5,
+      wsheet: 20,
+      tsus: 8,
+      rgate: 4
+    };
+
+    function renderArchSpecificInputs() {
+      const arch = document.getElementById('arch').value;
+      const container = document.getElementById('archSpecificControls');
+      let html = '';
+
+      if (arch === 'bulk') {
+        html = `
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Substrate Depth (nm)</label>
+            <input type="number" value="${extraState.subH}" min="20" max="500" oninput="extraState.subH=+this.value; updateOutputs()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>`;
+      } else if (arch === 'soi') {
+        html = `
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">SOI Body t_si (nm)</label>
+            <input type="number" value="${extraState.tsi}" min="3" max="100" step="0.5" oninput="extraState.tsi=+this.value; updateOutputs()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">BOX Thickness (nm)</label>
+            <input type="number" value="${extraState.tbox}" min="5" max="200" oninput="extraState.tbox=+this.value; updateOutputs()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>`;
+      } else if (arch === 'dg') {
+        html = `
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Channel Body t_si (nm)</label>
+            <input type="number" value="${extraState.tsi}" min="3" max="100" step="0.5" oninput="extraState.tsi=+this.value; updateOutputs()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>`;
+      } else if (arch === 'finfet') {
+        html = `
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Fin Height Hfin (nm)</label>
+            <input type="number" value="${extraState.hfin}" min="10" max="100" oninput="extraState.hfin=+this.value; updateOutputs()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Fin Width Wfin (nm)</label>
+            <input type="number" value="${extraState.wfin}" min="3" max="40" step="0.5" oninput="extraState.wfin=+this.value; updateOutputs()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>`;
+      } else if (arch === 'nanosheet') {
+        html = `
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Number of Sheets</label>
+            <input type="number" value="${extraState.nsheets}" min="1" max="6" oninput="extraState.nsheets=+this.value; updateOutputs()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Sheet Thickness (nm)</label>
+            <input type="number" value="${extraState.tsheet}" min="3" max="15" step="0.5" oninput="extraState.tsheet=+this.value; updateOutputs()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Sheet Width (nm)</label>
+            <input type="number" value="${extraState.wsheet}" min="8" max="60" oninput="extraState.wsheet=+this.value; updateOutputs()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Sheet Spacing (nm)</label>
+            <input type="number" value="${extraState.tsus}" min="4" max="25" oninput="extraState.tsus=+this.value; updateOutputs()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>`;
+      } else if (arch === 'gaafet') {
+        html = `
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Nanowire Radius (nm)</label>
+            <input type="number" value="${extraState.rgate}" min="2" max="25" step="0.5" oninput="extraState.rgate=+this.value; updateOutputs()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white" />
+          </div>`;
+      }
+      container.innerHTML = html;
+    }
+
+    function getParams() {
+      return {
+        arch: document.getElementById('arch').value,
+        polarity: document.getElementById('polarity').value,
+        lg: parseFloat(document.getElementById('lg').value) || 16,
+        lun: parseFloat(document.getElementById('lun').value) || 0,
+        lsd: parseFloat(document.getElementById('lsd').value) || 18,
+        tox: parseFloat(document.getElementById('tox').value) || 1.0,
+        hgate: parseFloat(document.getElementById('hgate').value) || 25,
+        oxMat: document.getElementById('oxMat').value,
+        nch: document.getElementById('nch').value.trim() || '1e16',
+        nsd: document.getElementById('nsd').value.trim() || '1e20',
+        next: document.getElementById('next').value.trim() || '2e19',
+        straggle: parseFloat(document.getElementById('straggle').value) || 2.5,
+        meshCh: parseFloat(document.getElementById('meshCh').value) || 0.5,
+        meshGlobal: parseFloat(document.getElementById('meshGlobal').value) || 5.0,
+        wf: parseFloat(document.getElementById('wf').value) || 4.55,
+        sweepType: document.getElementById('sweepType').value,
+        vdd: parseFloat(document.getElementById('vdd').value) || 0.7,
+        vlin: parseFloat(document.getElementById('vlin').value) || 0.05,
+        modQuantum: document.getElementById('modQuantum').checked,
+        mobPhumob: document.getElementById('mobPhumob').checked,
+        mobDopingDep: document.getElementById('mobDopingDep').checked,
+        mobHighField: document.getElementById('mobHighField').checked,
+        mobEnormal: document.getElementById('mobEnormal').checked,
+        enormalModel: document.getElementById('enormalModel').value,
+        recSrh: document.getElementById('recSrh').checked,
+        recBtbt: document.getElementById('recBtbt').checked,
+        recAuger: document.getElementById('recAuger').checked,
+        enableTraps: document.getElementById('enableTraps').checked,
+        trapType: document.getElementById('trapType').value,
+        trapConc: document.getElementById('trapConc').value.trim() || '1e12',
+        trapLocation: document.getElementById('trapLocation').value,
+        trapEnergy: parseFloat(document.getElementById('trapEnergy').value) || 0.0,
+        // AC Small-Signal Parameters
+        acMode: document.getElementById('acMode').value,
+        acNode: document.getElementById('acNode').value,
+        fStart: document.getElementById('fStart').value.trim() || '1e6',
+        fStop: document.getElementById('fStop').value.trim() || '1e11',
+        fPoints: parseInt(document.getElementById('fPoints').value, 10) || 25,
+        acVds: parseFloat(document.getElementById('acVds').value) || 0.0,
+        ...extraState
+      };
+    }
+
+    function applyPreset(name) {
+      const presets = {
+        bulk:      { arch: 'bulk', polarity: 'nmos', lg: 65, lun: 10, lsd: 45, tox: 1.8, hgate: 50, oxMat: 'SiO2', nch: '5e17', nsd: '1e20', next: '2e19', straggle: 6, meshCh: 1.0, meshGlobal: 8, wf: 4.15, vdd: 1.1, subH: 120 },
+        soi:       { arch: 'soi', polarity: 'nmos', lg: 22, lun: 5, lsd: 25, tox: 1.1, hgate: 35, oxMat: 'HfO2', nch: '1e15', nsd: '1e20', next: '3e19', straggle: 3, meshCh: 0.6, meshGlobal: 5, wf: 4.50, vdd: 0.8, tsi: 7, tbox: 25 },
+        finfet:    { arch: 'finfet', polarity: 'nmos', lg: 16, lun: 4, lsd: 18, tox: 0.9, hgate: 25, oxMat: 'HfO2', nch: '1e16', nsd: '1e20', next: '2e19', straggle: 2.5, meshCh: 0.5, meshGlobal: 4, wf: 4.55, vdd: 0.7, hfin: 35, wfin: 7 },
+        nanosheet: { arch: 'nanosheet', polarity: 'nmos', lg: 12, lun: 3.5, lsd: 15, tox: 0.8, hgate: 20, oxMat: 'HfO2', nch: '1e15', nsd: '1.5e20', next: '3e19', straggle: 2.0, meshCh: 0.4, meshGlobal: 3.5, wf: 4.52, vdd: 0.65, nsheets: 3, tsheet: 5, wsheet: 20, tsus: 8 },
+        gaafet:    { arch: 'gaafet', polarity: 'nmos', lg: 10, lun: 3, lsd: 14, tox: 0.75, hgate: 18, oxMat: 'HfO2', nch: '1e15', nsd: '1.5e20', next: '3e19', straggle: 1.8, meshCh: 0.4, meshGlobal: 3.0, wf: 4.50, vdd: 0.6, rgate: 4 }
+      };
+      const pr = presets[name];
+      if (!pr) return;
+      Object.assign(extraState, pr);
+      for (const [k, v] of Object.entries(pr)) {
+        const el = document.getElementById(k);
+        if (el) el.value = v;
+      }
+      updateUI();
+    }
+
+    function buildSharedPhysicsBlocks(p) {
+      const mobItems = [];
+      if (p.mobPhumob) mobItems.push('    PhuMob');
+      if (p.mobDopingDep) mobItems.push('    DopingDependence');
+      if (p.mobEnormal) mobItems.push(`    Enormal( ${p.enormalModel} )`);
+      if (p.mobHighField) mobItems.push('    HighFieldSaturation');
+      const mobilityBlock = mobItems.length > 0 ? `  Mobility(\n${mobItems.join('\n')}\n  )` : '';
+
+      const recItems = [];
+      if (p.recSrh) recItems.push('    SRH( DopingDep )');
+      if (p.recAuger) recItems.push('    Auger');
+      if (p.recBtbt) recItems.push('    Band2Band( Hurkx )');
+      const recombBlock = recItems.length > 0 ? `  Recombination(\n${recItems.join('\n')}\n  )` : '';
+
+      const qmModel = p.polarity === 'nmos' ? 'eQuantumPotential' : 'hQuantumPotential';
+      const physicsLines = [
+        '  EffectiveIntrinsicDensity( OldSlotboom )',
+        mobilityBlock,
+        p.modQuantum ? `  ${qmModel}` : '',
+        recombBlock
+      ].filter(Boolean).join('\n');
+
+      let interfaceBlock = '';
+      if (p.enableTraps) {
+        let matInterface = `${p.oxMat}/Silicon`;
+        if (p.trapLocation === 'box_channel') matInterface = 'SiO2/Silicon';
+        else if (p.trapLocation === 'spacer_channel') matInterface = 'Si3N4/Silicon';
+
+        if (p.trapType === 'FixedCharge') {
+          interfaceBlock = `\nPhysics( MaterialInterface="${matInterface}" ) {\n  Charge( Conc=${p.trapConc} )\n}\n`;
+        } else {
+          interfaceBlock = `\nPhysics( MaterialInterface="${matInterface}" ) {\n  Traps(\n    ( ${p.trapType} Level Conc=${p.trapConc} EnergyMid=${p.trapEnergy.toFixed(2)} FromMidBandGap\n      eXsection=1e-15 hXsection=1e-15 )\n  )\n}\n`;
+        }
+      }
+
+      return { physicsLines, interfaceBlock, qmModel };
+    }
+
+    function generateSdeScript(p) {
+      const chSpecies = p.polarity === 'nmos' ? 'BoronActiveConcentration' : 'PhosphorusActiveConcentration';
+      const sdSpecies = p.polarity === 'nmos' ? 'PhosphorusActiveConcentration' : 'BoronActiveConcentration';
+      const halfLg = (p.lg / 2).toFixed(4);
+      const halfCh = (p.lg / 2 + p.lun).toFixed(4);
+      const halfTot = (p.lg / 2 + p.lun + p.lsd).toFixed(4);
+      const um = (nm) => (nm / 1000).toFixed(5);
+
+      let geomBlock = '';
+      let contactsBlock = '';
+      let meshBlock = '';
+
+      if (p.arch === 'bulk') {
+        geomBlock = `; --- 2D Bulk MOSFET Geometry (um) ---
+(sdegeo:create-rectangle (position -${um(halfTot)} 0 0) (position ${um(halfTot)} ${um(p.subH)} 0) "Silicon" "R.Substrate")
+(sdegeo:create-rectangle (position -${um(halfCh)} -${um(p.tox)} 0) (position ${um(halfCh)} 0 0) "${p.oxMat}" "R.GateOxide")
+(sdegeo:create-rectangle (position -${um(halfLg)} -${um(p.tox + p.hgate)} 0) (position ${um(halfLg)} -${um(p.tox)} 0) "PolySilicon" "R.Gate")
+(sdegeo:create-rectangle (position -${um(halfCh)} -${um(p.tox + p.hgate)} 0) (position -${um(halfLg)} -${um(p.tox)} 0) "Si3N4" "R.SpacerL")
+(sdegeo:create-rectangle (position ${um(halfLg)} -${um(p.tox + p.hgate)} 0) (position ${um(halfCh)} -${um(p.tox)} 0) "Si3N4" "R.SpacerR")`;
+
+        contactsBlock = `; --- Contacts ---
+(sdegeo:define-contact-set "source" 4 (color:rgb 1 0 0) "##")
+(sdegeo:define-contact-set "drain" 4 (color:rgb 0 1 0) "##")
+(sdegeo:define-contact-set "gate" 4 (color:rgb 0 0 1) "##")
+(sdegeo:define-contact-set "substrate" 4 (color:rgb 1 1 0) "##")
+
+(sdegeo:set-current-contact-set "source")
+(sdegeo:set-contact (find-edge-id (position -${um(p.lg/2 + p.lun + p.lsd/2)} 0 0)) "source")
+(sdegeo:set-current-contact-set "drain")
+(sdegeo:set-contact (find-edge-id (position ${um(p.lg/2 + p.lun + p.lsd/2)} 0 0)) "drain")
+(sdegeo:set-current-contact-set "gate")
+(sdegeo:set-contact (find-edge-id (position 0 -${um(p.tox + p.hgate)} 0)) "gate")
+(sdegeo:set-current-contact-set "substrate")
+(sdegeo:set-contact (find-edge-id (position 0 ${um(p.subH)} 0)) "substrate")`;
+
+        meshBlock = `(sdedr:define-refeval-window "RW.Global" "Rectangle" (position -${um(halfTot)} -${um(p.tox + p.hgate)} 0) (position ${um(halfTot)} ${um(p.subH)} 0))
+(sdedr:define-refeval-window "RW.Channel" "Rectangle" (position -${um(halfCh)} -${um(p.tox)} 0) (position ${um(halfCh)} ${um(Math.min(20, p.subH))} 0))`;
+      } else if (p.arch === 'soi') {
+        geomBlock = `; --- 2D SOI MOSFET Geometry (um) ---
+(sdegeo:create-rectangle (position -${um(halfTot)} 0 0) (position ${um(halfTot)} ${um(p.tsi)} 0) "Silicon" "R.ChannelBody")
+(sdegeo:create-rectangle (position -${um(halfTot)} ${um(p.tsi)} 0) (position ${um(halfTot)} ${um(p.tsi + p.tbox)} 0) "SiO2" "R.BOX")
+(sdegeo:create-rectangle (position -${um(halfTot)} ${um(p.tsi + p.tbox)} 0) (position ${um(halfTot)} ${um(p.tsi + p.tbox + 30)} 0) "Silicon" "R.HandleSub")
+(sdegeo:create-rectangle (position -${um(halfCh)} -${um(p.tox)} 0) (position ${um(halfCh)} 0 0) "${p.oxMat}" "R.GateOxide")
+(sdegeo:create-rectangle (position -${um(halfLg)} -${um(p.tox + p.hgate)} 0) (position ${um(halfLg)} -${um(p.tox)} 0) "PolySilicon" "R.Gate")
+(sdegeo:create-rectangle (position -${um(halfCh)} -${um(p.tox + p.hgate)} 0) (position -${um(halfLg)} -${um(p.tox)} 0) "Si3N4" "R.SpacerL")
+(sdegeo:create-rectangle (position ${um(halfLg)} -${um(p.tox + p.hgate)} 0) (position ${um(halfCh)} -${um(p.tox)} 0) "Si3N4" "R.SpacerR")`;
+
+        contactsBlock = `; --- Contacts ---
+(sdegeo:define-contact-set "source" 4 (color:rgb 1 0 0) "##")
+(sdegeo:define-contact-set "drain" 4 (color:rgb 0 1 0) "##")
+(sdegeo:define-contact-set "gate" 4 (color:rgb 0 0 1) "##")
+(sdegeo:define-contact-set "substrate" 4 (color:rgb 1 1 0) "##")
+
+(sdegeo:set-current-contact-set "source")
+(sdegeo:set-contact (find-edge-id (position -${um(halfTot)} ${um(p.tsi/2)} 0)) "source")
+(sdegeo:set-current-contact-set "drain")
+(sdegeo:set-contact (find-edge-id (position ${um(halfTot)} ${um(p.tsi/2)} 0)) "drain")
+(sdegeo:set-current-contact-set "gate")
+(sdegeo:set-contact (find-edge-id (position 0 -${um(p.tox + p.hgate)} 0)) "gate")
+(sdegeo:set-current-contact-set "substrate")
+(sdegeo:set-contact (find-edge-id (position 0 ${um(p.tsi + p.tbox + 30)} 0)) "substrate")`;
+
+        meshBlock = `(sdedr:define-refeval-window "RW.Global" "Rectangle" (position -${um(halfTot)} -${um(p.tox + p.hgate)} 0) (position ${um(halfTot)} ${um(p.tsi + p.tbox + 30)} 0))
+(sdedr:define-refeval-window "RW.Channel" "Rectangle" (position -${um(halfCh)} -${um(p.tox)} 0) (position ${um(halfCh)} ${um(p.tsi)} 0))`;
+      } else if (p.arch === 'dg') {
+        const halfTsi = p.tsi / 2;
+        geomBlock = `; --- 2D Symmetric Double-Gate MOSFET Geometry (um) ---
+(sdegeo:create-rectangle (position -${um(halfTot)} -${um(halfTsi)} 0) (position ${um(halfTot)} ${um(halfTsi)} 0) "Silicon" "R.Channel")
+(sdegeo:create-rectangle (position -${um(halfCh)} -${um(halfTsi + p.tox)} 0) (position ${um(halfCh)} -${um(halfTsi)} 0) "${p.oxMat}" "R.TopOxide")
+(sdegeo:create-rectangle (position -${um(halfCh)} ${um(halfTsi)} 0) (position ${um(halfCh)} ${um(halfTsi + p.tox)} 0) "${p.oxMat}" "R.BotOxide")
+(sdegeo:create-rectangle (position -${um(halfLg)} -${um(halfTsi + p.tox + p.hgate)} 0) (position ${um(halfLg)} -${um(halfTsi + p.tox)} 0) "PolySilicon" "R.TopGate")
+(sdegeo:create-rectangle (position -${um(halfLg)} ${um(halfTsi + p.tox)} 0) (position ${um(halfLg)} ${um(halfTsi + p.tox + p.hgate)} 0) "PolySilicon" "R.BotGate")`;
+
+        contactsBlock = `; --- Contacts ---
+(sdegeo:define-contact-set "source" 4 (color:rgb 1 0 0) "##")
+(sdegeo:define-contact-set "drain" 4 (color:rgb 0 1 0) "##")
+(sdegeo:define-contact-set "gate" 4 (color:rgb 0 0 1) "##")
+
+(sdegeo:set-current-contact-set "source")
+(sdegeo:set-contact (find-edge-id (position -${um(halfTot)} 0 0)) "source")
+(sdegeo:set-current-contact-set "drain")
+(sdegeo:set-contact (find-edge-id (position ${um(halfTot)} 0 0)) "drain")
+(sdegeo:set-current-contact-set "gate")
+(sdegeo:set-contact (find-edge-id (position 0 -${um(halfTsi + p.tox + p.hgate)} 0)) "gate")
+(sdegeo:set-contact (find-edge-id (position 0 ${um(halfTsi + p.tox + p.hgate)} 0)) "gate")`;
+
+        meshBlock = `(sdedr:define-refeval-window "RW.Global" "Rectangle" (position -${um(halfTot)} -${um(halfTsi + p.tox + p.hgate)} 0) (position ${um(halfTot)} ${um(halfTsi + p.tox + p.hgate)} 0))
+(sdedr:define-refeval-window "RW.Channel" "Rectangle" (position -${um(halfCh)} -${um(halfTsi + p.tox)} 0) (position ${um(halfCh)} ${um(halfTsi + p.tox)} 0))`;
+      } else if (p.arch === 'finfet') {
+        const halfW = p.wfin / 2;
+        geomBlock = `; --- 3D Tri-Gate FinFET Geometry (um) ---
+(sdegeo:set-default-boolean "ABA")
+(sdegeo:create-cuboid (position -${um(halfTot)} 0 -${um(halfW)}) (position ${um(halfTot)} ${um(p.hfin)} ${um(halfW)}) "Silicon" "R.Fin")
+(sdegeo:create-cuboid (position -${um(halfCh)} 0 -${um(halfW + p.tox)}) (position ${um(halfCh)} ${um(p.hfin + p.tox)} ${um(halfW + p.tox)}) "${p.oxMat}" "R.GateOxide")
+(sdegeo:create-cuboid (position -${um(halfLg)} 0 -${um(halfW + p.tox + p.hgate)}) (position ${um(halfLg)} ${um(p.hfin + p.tox + p.hgate)} ${um(halfW + p.tox + p.hgate)}) "Metal" "R.Gate")
+(sdegeo:create-cuboid (position -${um(halfTot)} -${um(20)} -${um(halfW + p.tox + p.hgate)}) (position ${um(halfTot)} 0 ${um(halfW + p.tox + p.hgate)}) "SiO2" "R.STI")`;
+
+        contactsBlock = `; --- 3D Contacts ---
+(sdegeo:define-contact-set "source" 4 (color:rgb 1 0 0) "##")
+(sdegeo:define-contact-set "drain" 4 (color:rgb 0 1 0) "##")
+(sdegeo:define-contact-set "gate" 4 (color:rgb 0 0 1) "##")
+
+(sdegeo:set-current-contact-set "source")
+(sdegeo:set-contact (find-face-id (position -${um(halfTot)} ${um(p.hfin/2)} 0)) "source")
+(sdegeo:set-current-contact-set "drain")
+(sdegeo:set-contact (find-face-id (position ${um(halfTot)} ${um(p.hfin/2)} 0)) "drain")
+(sdegeo:set-current-contact-set "gate")
+(sdegeo:set-contact (find-face-id (position 0 ${um(p.hfin + p.tox + p.hgate)} 0)) "gate")`;
+
+        meshBlock = `(sdedr:define-refeval-window "RW.Global" "Cuboid" (position -${um(halfTot)} -${um(20)} -${um(halfW + p.tox + p.hgate)}) (position ${um(halfTot)} ${um(p.hfin + p.tox + p.hgate)} ${um(halfW + p.tox + p.hgate)}))
+(sdedr:define-refeval-window "RW.Channel" "Cuboid" (position -${um(halfCh)} 0 -${um(halfW + p.tox)}) (position ${um(halfCh)} ${um(p.hfin + p.tox)} ${um(halfW + p.tox)}))`;
+      } else if (p.arch === 'nanosheet') {
+        const halfW = p.wsheet / 2;
+        const pitch = p.tsheet + p.tsus;
+        const totalH = p.nsheets * pitch + p.tsus;
+        let sheetLines = '';
+        for (let i = 0; i < p.nsheets; i++) {
+          const y0 = p.tsus + i * pitch;
+          const y1 = y0 + p.tsheet;
+          sheetLines += `(sdegeo:create-cuboid (position -${um(halfTot)} ${um(y0)} -${um(halfW)}) (position ${um(halfTot)} ${um(y1)} ${um(halfW)}) "Silicon" "R.Sheet_${i+1}")\n`;
+          sheetLines += `(sdegeo:create-cuboid (position -${um(halfCh)} ${um(y0 - p.tox)} -${um(halfW + p.tox)}) (position ${um(halfCh)} ${um(y1 + p.tox)} ${um(halfW + p.tox)}) "${p.oxMat}" "R.Oxide_${i+1}")\n`;
+        }
+        geomBlock = `; --- 3D Stacked Nanosheet GAAFET (${p.nsheets} Sheets, um) ---
+(sdegeo:set-default-boolean "ABA")
+; Source/Drain Epi Pads
+(sdegeo:create-cuboid (position -${um(halfTot)} 0 -${um(halfW)}) (position -${um(halfCh)} ${um(totalH)} ${um(halfW)}) "Silicon" "R.SourcePad")
+(sdegeo:create-cuboid (position ${um(halfCh)} 0 -${um(halfW)}) (position ${um(halfTot)} ${um(totalH)} ${um(halfW)}) "Silicon" "R.DrainPad")
+; Stacked Silicon Sheets & Wrap-Around High-k Oxide
+${sheetLines}; Wrap-Around Metal Gate
+(sdegeo:create-cuboid (position -${um(halfLg)} 0 -${um(halfW + p.tox + p.hgate)}) (position ${um(halfLg)} ${um(totalH + p.hgate)} ${um(halfW + p.tox + p.hgate)}) "Metal" "R.Gate")`;
+
+        contactsBlock = `; --- 3D Contacts ---
+(sdegeo:define-contact-set "source" 4 (color:rgb 1 0 0) "##")
+(sdegeo:define-contact-set "drain" 4 (color:rgb 0 1 0) "##")
+(sdegeo:define-contact-set "gate" 4 (color:rgb 0 0 1) "##")
+
+(sdegeo:set-current-contact-set "source")
+(sdegeo:set-contact (find-face-id (position -${um(halfTot)} ${um(totalH/2)} 0)) "source")
+(sdegeo:set-current-contact-set "drain")
+(sdegeo:set-contact (find-face-id (position ${um(halfTot)} ${um(totalH/2)} 0)) "drain")
+(sdegeo:set-current-contact-set "gate")
+(sdegeo:set-contact (find-face-id (position 0 ${um(totalH + p.hgate)} 0)) "gate")`;
+
+        meshBlock = `(sdedr:define-refeval-window "RW.Global" "Cuboid" (position -${um(halfTot)} 0 -${um(halfW + p.tox + p.hgate)}) (position ${um(halfTot)} ${um(totalH + p.hgate)} ${um(halfW + p.tox + p.hgate)}))
+(sdedr:define-refeval-window "RW.Channel" "Cuboid" (position -${um(halfCh)} 0 -${um(halfW + p.tox)}) (position ${um(halfCh)} ${um(totalH)} ${um(halfW + p.tox)}))`;
+      } else if (p.arch === 'gaafet') {
+        const r = p.rgate;
+        geomBlock = `; --- 3D Cylindrical Gate-All-Around Nanowire FET (um) ---
+(sdegeo:set-default-boolean "ABA")
+(sdegeo:create-cylinder (position -${um(halfTot)} 0 0) (position ${um(halfTot)} 0 0) ${um(r)} "Silicon" "R.Nanowire")
+(sdegeo:create-cylinder (position -${um(halfCh)} 0 0) (position ${um(halfCh)} 0 0) ${um(r + p.tox)} "${p.oxMat}" "R.GateOxide")
+(sdegeo:create-cylinder (position -${um(halfLg)} 0 0) (position ${um(halfLg)} 0 0) ${um(r + p.tox + p.hgate)} "Metal" "R.Gate")`;
+
+        contactsBlock = `; --- 3D Contacts ---
+(sdegeo:define-contact-set "source" 4 (color:rgb 1 0 0) "##")
+(sdegeo:define-contact-set "drain" 4 (color:rgb 0 1 0) "##")
+(sdegeo:define-contact-set "gate" 4 (color:rgb 0 0 1) "##")
+
+(sdegeo:set-current-contact-set "source")
+(sdegeo:set-contact (find-face-id (position -${um(halfTot)} 0 0)) "source")
+(sdegeo:set-current-contact-set "drain")
+(sdegeo:set-contact (find-face-id (position ${um(halfTot)} 0 0)) "drain")
+(sdegeo:set-current-contact-set "gate")
+(sdegeo:set-contact (find-face-id (position 0 ${um(r + p.tox + p.hgate)} 0)) "gate")`;
+
+        const boxR = r + p.tox + p.hgate;
+        meshBlock = `(sdedr:define-refeval-window "RW.Global" "Cuboid" (position -${um(halfTot)} -${um(boxR)} -${um(boxR)}) (position ${um(halfTot)} ${um(boxR)} ${um(boxR)}))
+(sdedr:define-refeval-window "RW.Channel" "Cuboid" (position -${um(halfCh)} -${um(r + p.tox)} -${um(r + p.tox)}) (position ${um(halfCh)} ${um(r + p.tox)} ${um(r + p.tox)}))`;
+      }
+
+      const is3D = ['finfet', 'nanosheet', 'gaafet'].includes(p.arch);
+      const winType = is3D ? 'Cuboid' : 'Rectangle';
+      const zMin = is3D ? `-${um(100)}` : '0';
+      const zMax = is3D ? `${um(100)}` : '0';
+
+      return `; ============================================================================
+; Sentaurus Structure Editor (SDE) Command File - sde_dvs.cmd
+; Architecture: ${p.arch.toUpperCase()} (${p.polarity.toUpperCase()}) | Lg = ${p.lg} nm | tox = ${p.tox} nm
+; ============================================================================
+
+(sde:clear)
+(sdegeo:set-default-boolean "BAB")
+
+${geomBlock}
+
+${contactsBlock}
+
+; --- Analytical Doping Profiles ---
+; 1. Uniform Channel / Substrate Background Doping
+(sdedr:define-constant-profile "CP.Channel" "${chSpecies}" ${p.nch})
+(sdedr:define-constant-profile-material "CPM.Channel" "CP.Channel" "Silicon")
+
+; 2. Source & Drain Heavy Doping (Gaussian Lateral Roll-off)
+(sdedr:define-refeval-window "RW.Source" "${winType}" (position -${um(halfTot)} -${um(100)} ${zMin}) (position -${um(halfCh)} ${um(200)} ${zMax}))
+(sdedr:define-refeval-window "RW.Drain"  "${winType}" (position ${um(halfCh)} -${um(100)} ${zMin}) (position ${um(halfTot)} ${um(200)} ${zMax}))
+
+(sdedr:define-gaussian-profile "GP.SD" "${sdSpecies}"
+  "PeakPos" 0.0 "PeakVal" ${p.nsd}
+  "ValueAtDepth" ${p.nch} "Depth" ${um(40)}
+  "Gauss" "Factor" ${(p.straggle / 40).toFixed(3)})
+
+(sdedr:define-analytical-profile-placement "APP.Source" "GP.SD" "RW.Source" "Positive" "NoReplace" "Eval")
+(sdedr:define-analytical-profile-placement "APP.Drain"  "GP.SD" "RW.Drain"  "Positive" "NoReplace" "Eval")
+
+; 3. Source/Drain Extension (Underlap / LDD)
+(sdedr:define-refeval-window "RW.ExtL" "${winType}" (position -${um(halfCh)} -${um(100)} ${zMin}) (position -${um(halfLg)} ${um(200)} ${zMax}))
+(sdedr:define-refeval-window "RW.ExtR" "${winType}" (position ${um(halfLg)} -${um(100)} ${zMin}) (position ${um(halfCh)} ${um(200)} ${zMax}))
+
+(sdedr:define-gaussian-profile "GP.Ext" "${sdSpecies}"
+  "PeakPos" 0.0 "PeakVal" ${p.next}
+  "ValueAtDepth" ${p.nch} "Depth" ${um(25)}
+  "Gauss" "Factor" ${(p.straggle / 50).toFixed(3)})
+
+(sdedr:define-analytical-profile-placement "APP.ExtL" "GP.Ext" "RW.ExtL" "Positive" "NoReplace" "Eval")
+(sdedr:define-analytical-profile-placement "APP.ExtR" "GP.Ext" "RW.ExtR" "Positive" "NoReplace" "Eval")
+
+; --- Mesh Refinement ---
+${meshBlock}
+
+(sdedr:define-refinement-size "RS.Global" ${um(p.meshGlobal)} ${um(p.meshGlobal)} ${is3D ? um(p.meshGlobal) : '0'} ${um(p.meshGlobal/2)} ${um(p.meshGlobal/2)} ${is3D ? um(p.meshGlobal/2) : '0'})
+(sdedr:define-refinement-placement "RP.Global" "RS.Global" "RW.Global")
+
+(sdedr:define-refinement-size "RS.Channel" ${um(p.meshCh * 2)} ${um(p.meshCh)} ${is3D ? um(p.meshCh) : '0'} ${um(p.meshCh)} ${um(p.meshCh/2)} ${is3D ? um(p.meshCh/2) : '0'})
+(sdedr:define-refinement-function "RS.Channel" "DopingConcentration" "MaxTransDiff" 1)
+(sdedr:define-refinement-placement "RP.Channel" "RS.Channel" "RW.Channel")
+
+; --- Build Mesh & Save TDR ---
+(sde:build-mesh "snmesh" "" "n1_msh")
+(sde:save-model "n1_dvs")
+`;
+    }
+
+    function generateSdeviceScript(p) {
+      const sign = p.polarity === 'nmos' ? '' : '-';
+      const carrierEq = p.polarity === 'nmos' ? 'Poisson Electron' : 'Poisson Hole';
+      const hasSub = (p.arch === 'bulk' || p.arch === 'soi');
+      const { physicsLines, interfaceBlock, qmModel } = buildSharedPhysicsBlocks(p);
+
+      const solveSection = p.sweepType === 'idvg'
+        ? `  # Ramp Drain to Vlin (${sign}${p.vlin} V)
+  Quasistationary (
+    InitialStep=0.05 MinStep=1e-5 MaxStep=0.25
+    Goal { Name="drain" Voltage=${sign}${p.vlin} }
+  ) { Coupled { ${carrierEq} ${p.modQuantum ? qmModel : ''} } }
+
+  # Sweep Gate Voltage (Id-Vg Transfer Curve)
+  NewCurrentFile="idvg_vlin_"
+  Quasistationary (
+    InitialStep=0.02 MinStep=1e-5 MaxStep=0.05
+    Goal { Name="gate" Voltage=${sign}${p.vdd} }
+  ) { Coupled { ${carrierEq} ${p.modQuantum ? qmModel : ''} } }
+
+  # Reset Gate to 0V, Ramp Drain to Vdd (${sign}${p.vdd} V), then Sweep Gate
+  Quasistationary (
+    InitialStep=0.05 MinStep=1e-5 MaxStep=0.2
+    Goal { Name="gate" Voltage=0.0 }
+  ) { Coupled { ${carrierEq} ${p.modQuantum ? qmModel : ''} } }
+
+  Quasistationary (
+    InitialStep=0.05 MinStep=1e-5 MaxStep=0.25
+    Goal { Name="drain" Voltage=${sign}${p.vdd} }
+  ) { Coupled { ${carrierEq} ${p.modQuantum ? qmModel : ''} } }
+
+  NewCurrentFile="idvg_vsat_"
+  Quasistationary (
+    InitialStep=0.02 MinStep=1e-5 MaxStep=0.05
+    Goal { Name="gate" Voltage=${sign}${p.vdd} }
+  ) { Coupled { ${carrierEq} ${p.modQuantum ? qmModel : ''} } }`
+        : `  # Set Gate Overdrive to Vdd (${sign}${p.vdd} V)
+  Quasistationary (
+    InitialStep=0.05 MinStep=1e-5 MaxStep=0.2
+    Goal { Name="gate" Voltage=${sign}${p.vdd} }
+  ) { Coupled { ${carrierEq} ${p.modQuantum ? qmModel : ''} } }
+
+  # Sweep Drain Voltage (Id-Vd Output Curve)
+  NewCurrentFile="idvd_vdd_"
+  Quasistationary (
+    InitialStep=0.02 MinStep=1e-5 MaxStep=0.05
+    Goal { Name="drain" Voltage=${sign}${p.vdd} }
+  ) { Coupled { ${carrierEq} ${p.modQuantum ? qmModel : ''} } }`;
+
+      return `# ============================================================================
+# Sentaurus Device (SDEVICE) DC Command File - sdevice_des.cmd
+# Architecture: ${p.arch.toUpperCase()} (${p.polarity.toUpperCase()}) | WF = ${p.wf} eV | Vdd = ${sign}${p.vdd} V
+# ============================================================================
+
+File {
+  Grid      = "n1_msh.tdr"
+  Plot      = "n1_des.tdr"
+  Current   = "n1_des.plt"
+  Output    = "n1_des.log"
+}
+
+Electrode {
+  { Name="source"    Voltage=0.0 }
+  { Name="drain"     Voltage=0.0 }
+  { Name="gate"      Voltage=0.0 Workfunction=${p.wf} }
+${hasSub ? '  { Name="substrate" Voltage=0.0 }\n' : ''}}
+
+Physics {
+  Temperature = 300
+${physicsLines}
+}
+${interfaceBlock}
+Plot {
+  eDensity hDensity
+  eCurrent/Vector hCurrent/Vector
+  Potential SpaceCharge ElectricField/Vector
+  eMobility hMobility
+  Doping DonorConcentration AcceptorConcentration
+  BandGap EffectiveBandGap ConductionBandEnergy ValenceBandEnergy
+  ${p.enableTraps ? 'eInterfaceTrappedCharge hInterfaceTrappedCharge' : ''}
+}
+
+Math {
+  Extrapolate
+  Derivatives
+  RelErrControl
+  Digits = 5
+  Iterations = 25
+  Notdamped = 50
+  Method = Blocked
+  SubMethod = Pardiso
+}
+
+Solve {
+  # Initial Equilibrium Solution
+  Poisson
+  Coupled { ${carrierEq} ${p.modQuantum ? qmModel : ''} }
+
+${solveSection}
+}
+`;
+    }
+
+    function generateAcScript(p) {
+      const sign = p.polarity === 'nmos' ? '' : '-';
+      const oppSign = p.polarity === 'nmos' ? '-' : '';
+      const carrierEq = p.polarity === 'nmos' ? 'Poisson Electron' : 'Poisson Hole';
+      const hasSub = (p.arch === 'bulk' || p.arch === 'soi');
+      const { physicsLines, interfaceBlock, qmModel } = buildSharedPhysicsBlocks(p);
+      const coupledEq = `${carrierEq} ${p.modQuantum ? qmModel : ''}`.trim();
+
+      const acSolveBlock = p.acMode === 'cv'
+        ? `  # 1. Equilibrium & Set Drain DC Bias (${sign}${p.acVds} V)
+  Poisson
+  Coupled { ${coupledEq} }
+
+  ${p.acVds > 0 ? `Quasistationary (
+    InitialStep=0.05 MinStep=1e-5 MaxStep=0.25
+    Goal { Parameter=vd.dc Voltage=${sign}${p.acVds} }
+  ) { Coupled { ${coupledEq} } }\n` : ''}
+  # 2. Pre-bias Gate to Accumulation (${oppSign}${p.vdd} V)
+  Quasistationary (
+    InitialStep=0.05 MinStep=1e-5 MaxStep=0.2
+    Goal { Parameter=vg.dc Voltage=${oppSign}${p.vdd} }
+  ) { Coupled { ${coupledEq} } }
+
+  # 3. C-V Sweep from Accumulation (${oppSign}${p.vdd} V) to Inversion (${sign}${p.vdd} V) at f = ${p.fStart} Hz
+  NewCurrentFile="ac_cv_"
+  Quasistationary (
+    InitialStep=0.02 MinStep=1e-5 MaxStep=0.05
+    Goal { Parameter=vg.dc Voltage=${sign}${p.vdd} }
+  ) {
+    ACCoupled (
+      StartFrequency=${p.fStart} EndFrequency=${p.fStart}
+      NumberOfPoints=1 Decade
+      Node( "g" "d" "s"${hasSub ? ' "b"' : ''} )
+      Exclude( "vg" "vd" "vs"${hasSub ? ' "vb"' : ''} )
+      ACCompute ( Time = (Range = (0 1) Intervals = 40) )
+    ) { ${coupledEq} }
+  }`
+        : `  # 1. Equilibrium & Bias to Operating Point (Vgs = ${sign}${p.vdd} V, Vds = ${sign}${p.acVds} V)
+  Poisson
+  Coupled { ${coupledEq} }
+
+  ${p.acVds > 0 ? `Quasistationary (
+    InitialStep=0.05 MinStep=1e-5 MaxStep=0.25
+    Goal { Parameter=vd.dc Voltage=${sign}${p.acVds} }
+  ) { Coupled { ${coupledEq} } }\n` : ''}
+  Quasistationary (
+    InitialStep=0.05 MinStep=1e-5 MaxStep=0.2
+    Goal { Parameter=vg.dc Voltage=${sign}${p.vdd} }
+  ) { Coupled { ${coupledEq} } }
+
+  # 2. Small-Signal Frequency Sweep (${p.fStart} Hz to ${p.fStop} Hz)
+  NewCurrentFile="ac_freq_"
+  ACCoupled (
+    StartFrequency=${p.fStart} EndFrequency=${p.fStop}
+    NumberOfPoints=${p.fPoints} Decade
+    Node( "g" "d" "s"${hasSub ? ' "b"' : ''} )
+    Exclude( "vg" "vd" "vs"${hasSub ? ' "vb"' : ''} )
+  ) { ${coupledEq} }`;
+
+      return `# ============================================================================
+# Sentaurus Device (SDEVICE) AC Small-Signal Command File - sdevice_ac.cmd
+# Architecture: ${p.arch.toUpperCase()} (${p.polarity.toUpperCase()}) | Mode: ${p.acMode.toUpperCase()} | Excitation: ${p.acNode.toUpperCase()}
+# Extracts Admittance Y(i,j) & Capacitance Matrix C(i,j) = Im(Y(i,j)) / (2*pi*f)
+# ============================================================================
+
+Device "MOSFET" {
+  File {
+    Grid    = "n1_msh.tdr"
+    Plot    = "n1_ac_des.tdr"
+    Current = "n1_ac_des.plt"
+  }
+
+  Electrode {
+    { Name="source"    Voltage=0.0 }
+    { Name="drain"     Voltage=0.0 }
+    { Name="gate"      Voltage=0.0 Workfunction=${p.wf} }
+${hasSub ? '    { Name="substrate" Voltage=0.0 }\n' : ''}  }
+
+  Physics {
+    Temperature = 300
+${physicsLines}
+  }
+${interfaceBlock}
+  Plot {
+    eDensity hDensity
+    Potential ElectricField/Vector
+    SpaceCharge Doping
+  }
+}
+
+File {
+  Output = "n1_ac_des.log"
+  ACExtract = "n1_ac_matrix.plt"
+}
+
+System {
+  *- Intrinsic Device Instance
+  MOSFET dut (
+    "source"    = "s"
+    "drain"     = "d"
+    "gate"      = "g"
+${hasSub ? '    "substrate" = "b"\n' : ''}  )
+
+  *- Independent DC + AC Small-Signal Voltage Sources
+  Vsource_pset vs ( "s" 0 ) { dc = 0.0 }
+  Vsource_pset vd ( "d" 0 ) { dc = 0.0 ${p.acNode === 'drain' ? 'ac = 1.0' : ''} }
+  Vsource_pset vg ( "g" 0 ) { dc = 0.0 ${p.acNode === 'gate' ? 'ac = 1.0' : ''} }
+${hasSub ? '  Vsource_pset vb ( "b" 0 ) { dc = 0.0 }\n' : ''}}
+
+Math {
+  Extrapolate
+  Derivatives
+  RelErrControl
+  Digits = 5
+  Iterations = 25
+  Notdamped = 50
+  Method = Blocked
+  SubMethod = Pardiso
+}
+
+Solve {
+${acSolveBlock}
+}
+`;
+    }
+
+    function renderSchematic(p) {
+      const svg = document.getElementById('schematicSvg');
+      const totLen = p.lsd * 2 + p.lun * 2 + p.lg;
+      const scaleX = 520 / Math.max(totLen, 20);
+      const x0 = 60;
+      const wSd = p.lsd * scaleX;
+      const wUn = p.lun * scaleX;
+      const wLg = p.lg * scaleX;
+
+      const sdColor = p.polarity === 'nmos' ? '#ef4444' : '#3b82f6';
+      const chColor = p.polarity === 'nmos' ? '#1e3a8a' : '#7f1d1d';
+      const oxColor = p.oxMat === 'HfO2' ? '#10b981' : '#f59e0b';
+
+      let bodySvg = '';
+      if (p.arch === 'nanosheet') {
+        const sheets = Math.min(p.nsheets, 4);
+        const hSheet = 10;
+        const gap = 8;
+        const stackH = sheets * hSheet + (sheets - 1) * gap;
+        const yTop = 105 - stackH / 2;
+        bodySvg += `<rect x="${x0 + wSd + wUn}" y="${yTop - 14}" width="${wLg}" height="${stackH + 28}" fill="#6366f1" opacity="0.85" rx="2"/>`;
+        for (let i = 0; i < sheets; i++) {
+          const sy = yTop + i * (hSheet + gap);
+          bodySvg += `<rect x="${x0 + wSd + wUn}" y="${sy - 3}" width="${wLg}" height="${hSheet + 6}" fill="${oxColor}"/>`;
+          bodySvg += `<rect x="${x0 + wSd}" y="${sy}" width="${wLg + 2 * wUn}" height="${hSheet}" fill="${chColor}"/>`;
+        }
+        bodySvg += `<rect x="${x0}" y="${yTop - 4}" width="${wSd}" height="${stackH + 8}" fill="${sdColor}" rx="2"/>`;
+        bodySvg += `<rect x="${x0 + wSd + 2*wUn + wLg}" y="${yTop - 4}" width="${wSd}" height="${stackH + 8}" fill="${sdColor}" rx="2"/>`;
+      } else if (p.arch === 'dg' || p.arch === 'gaafet') {
+        const yBody = 86;
+        const hBody = 26;
+        bodySvg += `<rect x="${x0 + wSd + wUn}" y="${yBody - 24}" width="${wLg}" height="18" fill="#6366f1" rx="2"/>`;
+        bodySvg += `<rect x="${x0 + wSd + wUn}" y="${yBody - 6}" width="${wLg}" height="6" fill="${oxColor}"/>`;
+        bodySvg += `<rect x="${x0 + wSd + wUn}" y="${yBody + hBody}" width="${wLg}" height="6" fill="${oxColor}"/>`;
+        bodySvg += `<rect x="${x0 + wSd + wUn}" y="${yBody + hBody + 6}" width="${wLg}" height="18" fill="#6366f1" rx="2"/>`;
+        bodySvg += `<rect x="${x0}" y="${yBody}" width="${wSd}" height="${hBody}" fill="${sdColor}"/>`;
+        bodySvg += `<rect x="${x0 + wSd}" y="${yBody}" width="${wLg + 2*wUn}" height="${hBody}" fill="${chColor}"/>`;
+        bodySvg += `<rect x="${x0 + wSd + 2*wUn + wLg}" y="${yBody}" width="${wSd}" height="${hBody}" fill="${sdColor}"/>`;
+      } else {
+        const yTop = 85;
+        const hBody = p.arch === 'soi' ? 24 : 52;
+        bodySvg += `<rect x="${x0 + wSd + wUn}" y="${yTop - 32}" width="${wLg}" height="26" fill="#6366f1" rx="2"/>`;
+        bodySvg += `<rect x="${x0 + wSd}" y="${yTop - 32}" width="${wUn}" height="26" fill="#475569"/>`;
+        bodySvg += `<rect x="${x0 + wSd + wUn + wLg}" y="${yTop - 32}" width="${wUn}" height="26" fill="#475569"/>`;
+        bodySvg += `<rect x="${x0 + wSd}" y="${yTop - 6}" width="${wLg + 2*wUn}" height="6" fill="${oxColor}"/>`;
+        bodySvg += `<rect x="${x0}" y="${yTop}" width="${520}" height="${hBody}" fill="${chColor}"/>`;
+        bodySvg += `<rect x="${x0}" y="${yTop}" width="${wSd}" height="${Math.min(28, hBody)}" fill="${sdColor}"/>`;
+        bodySvg += `<rect x="${x0 + wSd + 2*wUn + wLg}" y="${yTop}" width="${wSd}" height="${Math.min(28, hBody)}" fill="${sdColor}"/>`;
+        if (p.arch === 'soi') {
+          bodySvg += `<rect x="${x0}" y="${yTop + hBody}" width="520" height="14" fill="#d97706"/>`;
+          bodySvg += `<text x="320" y="${yTop + hBody + 10}" fill="#fff" font-size="9" text-anchor="middle" font-family="monospace">Buried Oxide (BOX: ${p.tbox} nm)</text>`;
+        }
+        if (p.enableTraps) {
+          bodySvg += `<line x1="${x0 + wSd}" y1="${yTop}" x2="${x0 + wSd + wLg + 2*wUn}" y2="${yTop}" stroke="#f43f5e" stroke-width="2.5" stroke-dasharray="4 3" />`;
+        }
+      }
+
+      svg.innerHTML = `
+        ${bodySvg}
+        <text x="${x0 + wSd/2}" y="102" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">S</text>
+        <text x="${x0 + wSd + wUn + wLg/2}" y="72" fill="#e0e7ff" font-size="10" font-weight="bold" text-anchor="middle">Gate (${p.lg}nm)</text>
+        <text x="${x0 + wSd + 2*wUn + wLg + wSd/2}" y="102" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">D</text>
+        <text x="320" y="176" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="monospace">
+          Lsd=${p.lsd}nm | Lun=${p.lun}nm | Lg=${p.lg}nm | Lun=${p.lun}nm | Lsd=${p.lsd}nm  (${p.oxMat}: ${p.tox}nm)
+        </text>
+      `;
+
+      document.getElementById('dimSummary').textContent = `Total Length: ${totLen.toFixed(1)} nm | ${p.polarity.toUpperCase()}`;
+    }
+
+    function switchTab(tab) {
+      activeTab = tab;
+      const activeCls = 'px-3 py-1.5 rounded-md text-xs font-semibold transition bg-indigo-600 text-white shadow';
+      const inactiveCls = 'px-3 py-1.5 rounded-md text-xs font-semibold transition bg-slate-800 text-slate-300 hover:bg-slate-700';
+
+      document.getElementById('tabSdeBtn').className = tab === 'sde' ? activeCls : inactiveCls;
+      document.getElementById('tabSdevBtn').className = tab === 'sdevice' ? activeCls : inactiveCls;
+      document.getElementById('tabAcBtn').className = tab === 'ac' ? activeCls : inactiveCls;
+
+      updateOutputs();
+    }
+
+    function updateOutputs() {
+      const p = getParams();
+
+      const enormalWrap = document.getElementById('enormalModelWrapper');
+      enormalWrap.style.opacity = p.mobEnormal ? '1' : '0.4';
+      enormalWrap.style.pointerEvents = p.mobEnormal ? 'auto' : 'none';
+
+      const trapWrap = document.getElementById('trapControls');
+      trapWrap.style.opacity = p.enableTraps ? '1' : '0.4';
+      trapWrap.style.pointerEvents = p.enableTraps ? 'auto' : 'none';
+
+      renderSchematic(p);
+      let script = '';
+      if (activeTab === 'sde') script = generateSdeScript(p);
+      else if (activeTab === 'sdevice') script = generateSdeviceScript(p);
+      else script = generateAcScript(p);
+
+      document.getElementById('codeDisplay').textContent = script;
+    }
+
+    function updateUI() {
+      renderArchSpecificInputs();
+      updateOutputs();
+    }
+
+    function copyCode() {
+      const text = document.getElementById('codeDisplay').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copyBtn');
+        btn.textContent = '✓ Copied!';
+        setTimeout(() => btn.textContent = 'Copy Script', 1500);
+      });
+    }
+
+    function downloadCmd() {
+      const text = document.getElementById('codeDisplay').textContent;
+      const filenameMap = {
+        sde: 'sde_dvs.cmd',
+        sdevice: 'sdevice_des.cmd',
+        ac: 'sdevice_ac.cmd'
+      };
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filenameMap[activeTab] || 'script.cmd';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    updateUI();
+  </script>
+</body>
+</html>
