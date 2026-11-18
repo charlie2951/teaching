@@ -615,7 +615,7 @@
 (sdegeo:set-default-boolean "ABA")
 (sdegeo:create-cuboid (position -${um(halfTot)} 0 -${um(halfW)}) (position ${um(halfTot)} ${um(p.hfin)} ${um(halfW)}) "Silicon" "R.Fin")
 (sdegeo:create-cuboid (position -${um(halfCh)} 0 -${um(halfW + p.tox)}) (position ${um(halfCh)} ${um(p.hfin + p.tox)} ${um(halfW + p.tox)}) "${p.oxMat}" "R.GateOxide")
-(sdegeo:create-cuboid (position -${um(halfLg)} 0 -${um(halfW + p.tox + p.hgate)}) (position ${um(halfLg)} ${um(p.hfin + p.tox + p.hgate)} ${um(halfW + p.tox + p.hgate)}) "Metal" "R.Gate")
+(sdegeo:create-cuboid (position -${um(halfLg)} 0 -${um(halfW + p.tox + p.hgate)}) (position ${um(halfLg)} ${um(p.hfin + p.tox + p.hgate)} ${um(halfW + p.tox + p.hgate)}) "Molybdenum" "R.Gate")
 (sdegeo:create-cuboid (position -${um(halfTot)} -${um(20)} -${um(halfW + p.tox + p.hgate)}) (position ${um(halfTot)} 0 ${um(halfW + p.tox + p.hgate)}) "SiO2" "R.STI")`;
 
         contactsBlock = `; --- 3D Contacts ---
@@ -650,7 +650,7 @@
 (sdegeo:create-cuboid (position ${um(halfCh)} 0 -${um(halfW)}) (position ${um(halfTot)} ${um(totalH)} ${um(halfW)}) "Silicon" "R.DrainPad")
 ; Stacked Silicon Sheets & Wrap-Around High-k Oxide
 ${sheetLines}; Wrap-Around Metal Gate
-(sdegeo:create-cuboid (position -${um(halfLg)} 0 -${um(halfW + p.tox + p.hgate)}) (position ${um(halfLg)} ${um(totalH + p.hgate)} ${um(halfW + p.tox + p.hgate)}) "Metal" "R.Gate")`;
+(sdegeo:create-cuboid (position -${um(halfLg)} 0 -${um(halfW + p.tox + p.hgate)}) (position ${um(halfLg)} ${um(totalH + p.hgate)} ${um(halfW + p.tox + p.hgate)}) "Molybdenum" "R.Gate")`;
 
         contactsBlock = `; --- 3D Contacts ---
 (sdegeo:define-contact-set "source" 4 (color:rgb 1 0 0) "##")
@@ -672,7 +672,7 @@ ${sheetLines}; Wrap-Around Metal Gate
 (sdegeo:set-default-boolean "ABA")
 (sdegeo:create-cylinder (position -${um(halfTot)} 0 0) (position ${um(halfTot)} 0 0) ${um(r)} "Silicon" "R.Nanowire")
 (sdegeo:create-cylinder (position -${um(halfCh)} 0 0) (position ${um(halfCh)} 0 0) ${um(r + p.tox)} "${p.oxMat}" "R.GateOxide")
-(sdegeo:create-cylinder (position -${um(halfLg)} 0 0) (position ${um(halfLg)} 0 0) ${um(r + p.tox + p.hgate)} "Metal" "R.Gate")`;
+(sdegeo:create-cylinder (position -${um(halfLg)} 0 0) (position ${um(halfLg)} 0 0) ${um(r + p.tox + p.hgate)} "Molybdenum" "R.Gate")`;
 
         contactsBlock = `; --- 3D Contacts ---
 (sdegeo:define-contact-set "source" 4 (color:rgb 1 0 0) "##")
@@ -931,7 +931,7 @@ Device "MOSFET" {
   Electrode {
     { Name="source"    Voltage=0.0 }
     { Name="drain"     Voltage=0.0 }
-    { Name="gate"      Voltage=0.0 Workfunction=${p.wf} }
+    { Name="gate"      Voltage=0.0 }
 ${hasSub ? '    { Name="substrate" Voltage=0.0 }\n' : ''}  }
 
   Physics {
