@@ -537,7 +537,7 @@
         geomBlock = `; --- 2D Bulk MOSFET Geometry (um) ---
 (sdegeo:create-rectangle (position -${um(halfTot)} 0 0) (position ${um(halfTot)} ${um(p.subH)} 0) "Silicon" "R.Substrate")
 (sdegeo:create-rectangle (position -${um(halfCh)} -${um(p.tox)} 0) (position ${um(halfCh)} 0 0) "${p.oxMat}" "R.GateOxide")
-(sdegeo:create-rectangle (position -${um(halfLg)} -${um(p.tox + p.hgate)} 0) (position ${um(halfLg)} -${um(p.tox)} 0) "PolySilicon" "R.Gate")
+(sdegeo:create-rectangle (position -${um(halfLg)} -${um(p.tox + p.hgate)} 0) (position ${um(halfLg)} -${um(p.tox)} 0) "Molybdenum" "R.Gate")
 (sdegeo:create-rectangle (position -${um(halfCh)} -${um(p.tox + p.hgate)} 0) (position -${um(halfLg)} -${um(p.tox)} 0) "Si3N4" "R.SpacerL")
 (sdegeo:create-rectangle (position ${um(halfLg)} -${um(p.tox + p.hgate)} 0) (position ${um(halfCh)} -${um(p.tox)} 0) "Si3N4" "R.SpacerR")`;
 
@@ -564,7 +564,7 @@
 (sdegeo:create-rectangle (position -${um(halfTot)} ${um(p.tsi)} 0) (position ${um(halfTot)} ${um(p.tsi + p.tbox)} 0) "SiO2" "R.BOX")
 (sdegeo:create-rectangle (position -${um(halfTot)} ${um(p.tsi + p.tbox)} 0) (position ${um(halfTot)} ${um(p.tsi + p.tbox + 30)} 0) "Silicon" "R.HandleSub")
 (sdegeo:create-rectangle (position -${um(halfCh)} -${um(p.tox)} 0) (position ${um(halfCh)} 0 0) "${p.oxMat}" "R.GateOxide")
-(sdegeo:create-rectangle (position -${um(halfLg)} -${um(p.tox + p.hgate)} 0) (position ${um(halfLg)} -${um(p.tox)} 0) "PolySilicon" "R.Gate")
+(sdegeo:create-rectangle (position -${um(halfLg)} -${um(p.tox + p.hgate)} 0) (position ${um(halfLg)} -${um(p.tox)} 0) "Molybdenum" "R.Gate")
 (sdegeo:create-rectangle (position -${um(halfCh)} -${um(p.tox + p.hgate)} 0) (position -${um(halfLg)} -${um(p.tox)} 0) "Si3N4" "R.SpacerL")
 (sdegeo:create-rectangle (position ${um(halfLg)} -${um(p.tox + p.hgate)} 0) (position ${um(halfCh)} -${um(p.tox)} 0) "Si3N4" "R.SpacerR")`;
 
@@ -591,8 +591,8 @@
 (sdegeo:create-rectangle (position -${um(halfTot)} -${um(halfTsi)} 0) (position ${um(halfTot)} ${um(halfTsi)} 0) "Silicon" "R.Channel")
 (sdegeo:create-rectangle (position -${um(halfCh)} -${um(halfTsi + p.tox)} 0) (position ${um(halfCh)} -${um(halfTsi)} 0) "${p.oxMat}" "R.TopOxide")
 (sdegeo:create-rectangle (position -${um(halfCh)} ${um(halfTsi)} 0) (position ${um(halfCh)} ${um(halfTsi + p.tox)} 0) "${p.oxMat}" "R.BotOxide")
-(sdegeo:create-rectangle (position -${um(halfLg)} -${um(halfTsi + p.tox + p.hgate)} 0) (position ${um(halfLg)} -${um(halfTsi + p.tox)} 0) "PolySilicon" "R.TopGate")
-(sdegeo:create-rectangle (position -${um(halfLg)} ${um(halfTsi + p.tox)} 0) (position ${um(halfLg)} ${um(halfTsi + p.tox + p.hgate)} 0) "PolySilicon" "R.BotGate")`;
+(sdegeo:create-rectangle (position -${um(halfLg)} -${um(halfTsi + p.tox + p.hgate)} 0) (position ${um(halfLg)} -${um(halfTsi + p.tox)} 0) "Molybdenum" "R.TopGate")
+(sdegeo:create-rectangle (position -${um(halfLg)} ${um(halfTsi + p.tox)} 0) (position ${um(halfLg)} ${um(halfTsi + p.tox + p.hgate)} 0) "Molybdenum" "R.BotGate")`;
 
         contactsBlock = `; --- Contacts ---
 (sdegeo:define-contact-set "source" 4 (color:rgb 1 0 0) "##")
@@ -755,50 +755,50 @@ ${meshBlock}
 
     function generateSdeviceScript(p) {
       const sign = p.polarity === 'nmos' ? '' : '-';
-      const carrierEq = p.polarity === 'nmos' ? 'Poisson Electron' : 'Poisson Hole';
+      const carrierEq = p.polarity === 'nmos' ? 'Poisson Electron Hole' : 'Poisson Electron Hole';
       const hasSub = (p.arch === 'bulk' || p.arch === 'soi');
       const { physicsLines, interfaceBlock, qmModel } = buildSharedPhysicsBlocks(p);
 
       const solveSection = p.sweepType === 'idvg'
         ? `  # Ramp Drain to Vlin (${sign}${p.vlin} V)
   Quasistationary (
-    InitialStep=0.05 MinStep=1e-5 MaxStep=0.25
+    InitialStep=0.001 MinStep=1e-5 MaxStep=0.02
     Goal { Name="drain" Voltage=${sign}${p.vlin} }
   ) { Coupled { ${carrierEq} ${p.modQuantum ? qmModel : ''} } }
 
   # Sweep Gate Voltage (Id-Vg Transfer Curve)
   NewCurrentFile="idvg_vlin_"
   Quasistationary (
-    InitialStep=0.02 MinStep=1e-5 MaxStep=0.05
+    InitialStep=0.001 MinStep=1e-5 MaxStep=0.02
     Goal { Name="gate" Voltage=${sign}${p.vdd} }
   ) { Coupled { ${carrierEq} ${p.modQuantum ? qmModel : ''} } }
 
   # Reset Gate to 0V, Ramp Drain to Vdd (${sign}${p.vdd} V), then Sweep Gate
   Quasistationary (
-    InitialStep=0.05 MinStep=1e-5 MaxStep=0.2
+    InitialStep=0.001 MinStep=1e-5 MaxStep=0.02
     Goal { Name="gate" Voltage=0.0 }
   ) { Coupled { ${carrierEq} ${p.modQuantum ? qmModel : ''} } }
 
   Quasistationary (
-    InitialStep=0.05 MinStep=1e-5 MaxStep=0.25
+    InitialStep=0.001 MinStep=1e-5 MaxStep=0.02
     Goal { Name="drain" Voltage=${sign}${p.vdd} }
   ) { Coupled { ${carrierEq} ${p.modQuantum ? qmModel : ''} } }
 
   NewCurrentFile="idvg_vsat_"
   Quasistationary (
-    InitialStep=0.02 MinStep=1e-5 MaxStep=0.05
+    InitialStep=0.001 MinStep=1e-5 MaxStep=0.02
     Goal { Name="gate" Voltage=${sign}${p.vdd} }
   ) { Coupled { ${carrierEq} ${p.modQuantum ? qmModel : ''} } }`
         : `  # Set Gate Overdrive to Vdd (${sign}${p.vdd} V)
   Quasistationary (
-    InitialStep=0.05 MinStep=1e-5 MaxStep=0.2
+    InitialStep=0.001 MinStep=1e-5 MaxStep=0.02
     Goal { Name="gate" Voltage=${sign}${p.vdd} }
   ) { Coupled { ${carrierEq} ${p.modQuantum ? qmModel : ''} } }
 
   # Sweep Drain Voltage (Id-Vd Output Curve)
   NewCurrentFile="idvd_vdd_"
   Quasistationary (
-    InitialStep=0.02 MinStep=1e-5 MaxStep=0.05
+    InitialStep=0.001 MinStep=1e-5 MaxStep=0.02
     Goal { Name="drain" Voltage=${sign}${p.vdd} }
   ) { Coupled { ${carrierEq} ${p.modQuantum ? qmModel : ''} } }`;
 
@@ -817,7 +817,7 @@ File {
 Electrode {
   { Name="source"    Voltage=0.0 }
   { Name="drain"     Voltage=0.0 }
-  { Name="gate"      Voltage=0.0 Workfunction=${p.wf} }
+  { Name="gate"      Voltage=0.0 }
 ${hasSub ? '  { Name="substrate" Voltage=0.0 }\n' : ''}}
 
 Physics {
@@ -859,7 +859,7 @@ ${solveSection}
     function generateAcScript(p) {
       const sign = p.polarity === 'nmos' ? '' : '-';
       const oppSign = p.polarity === 'nmos' ? '-' : '';
-      const carrierEq = p.polarity === 'nmos' ? 'Poisson Electron' : 'Poisson Hole';
+      const carrierEq = p.polarity === 'nmos' ? 'Poisson Electron Hole' : 'Poisson Electron Hole';
       const hasSub = (p.arch === 'bulk' || p.arch === 'soi');
       const { physicsLines, interfaceBlock, qmModel } = buildSharedPhysicsBlocks(p);
       const coupledEq = `${carrierEq} ${p.modQuantum ? qmModel : ''}`.trim();
@@ -870,19 +870,19 @@ ${solveSection}
   Coupled { ${coupledEq} }
 
   ${p.acVds > 0 ? `Quasistationary (
-    InitialStep=0.05 MinStep=1e-5 MaxStep=0.25
+    InitialStep=0.05 MinStep=1e-5 MaxStep=0.02
     Goal { Parameter=vd.dc Voltage=${sign}${p.acVds} }
   ) { Coupled { ${coupledEq} } }\n` : ''}
   # 2. Pre-bias Gate to Accumulation (${oppSign}${p.vdd} V)
   Quasistationary (
-    InitialStep=0.05 MinStep=1e-5 MaxStep=0.2
+    InitialStep=0.05 MinStep=1e-5 MaxStep=0.02
     Goal { Parameter=vg.dc Voltage=${oppSign}${p.vdd} }
   ) { Coupled { ${coupledEq} } }
 
   # 3. C-V Sweep from Accumulation (${oppSign}${p.vdd} V) to Inversion (${sign}${p.vdd} V) at f = ${p.fStart} Hz
   NewCurrentFile="ac_cv_"
   Quasistationary (
-    InitialStep=0.02 MinStep=1e-5 MaxStep=0.05
+    InitialStep=0.02 MinStep=1e-5 MaxStep=0.02
     Goal { Parameter=vg.dc Voltage=${sign}${p.vdd} }
   ) {
     ACCoupled (
@@ -898,11 +898,11 @@ ${solveSection}
   Coupled { ${coupledEq} }
 
   ${p.acVds > 0 ? `Quasistationary (
-    InitialStep=0.05 MinStep=1e-5 MaxStep=0.25
+    InitialStep=0.05 MinStep=1e-5 MaxStep=0.02
     Goal { Parameter=vd.dc Voltage=${sign}${p.acVds} }
   ) { Coupled { ${coupledEq} } }\n` : ''}
   Quasistationary (
-    InitialStep=0.05 MinStep=1e-5 MaxStep=0.2
+    InitialStep=0.05 MinStep=1e-5 MaxStep=0.02
     Goal { Parameter=vg.dc Voltage=${sign}${p.vdd} }
   ) { Coupled { ${coupledEq} } }
 
